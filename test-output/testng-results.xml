@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results ignored="0" total="1" passed="1" failed="0" skipped="0">
+  <reporter-output>
+  </reporter-output>
+  <suite started-at="2026-07-31T14:53:31 IST" name="Default suite" finished-at="2026-07-31T14:53:42 IST" duration-ms="11277">
+    <groups>
+    </groups>
+    <test started-at="2026-07-31T14:53:31 IST" name="Default test" finished-at="2026-07-31T14:53:42 IST" duration-ms="11277">
+      <class name="yourdost_Automation.Demofortestng">
+        <test-method is-config="true" signature="setup()[pri:0, instance:yourdost_Automation.Demofortestng@6025e1b6]" started-at="2026-07-31T14:53:31 IST" name="setup" finished-at="2026-07-31T14:53:35 IST" duration-ms="3613" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setup -->
+        <test-method signature="login()[pri:0, instance:yourdost_Automation.Demofortestng@6025e1b6]" started-at="2026-07-31T14:53:35 IST" name="login" finished-at="2026-07-31T14:53:42 IST" duration-ms="7351" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- login -->
+        <test-method is-config="true" signature="teardown()[pri:0, instance:yourdost_Automation.Demofortestng@6025e1b6]" started-at="2026-07-31T14:53:42 IST" name="teardown" finished-at="2026-07-31T14:53:42 IST" duration-ms="247" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- teardown -->
+      </class> <!-- yourdost_Automation.Demofortestng -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>
