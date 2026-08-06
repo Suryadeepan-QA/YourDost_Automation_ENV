@@ -1,0 +1,19 @@
+16:36:18.495 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- User on logged in home page click on book appoinment ---
+16:36:20.537 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- user select the mode of experts---
+16:36:20.703 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- user select the experts and modes ---
+16:36:26.885 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- select mode of contact ---
+16:36:29.603 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- Booking review ---
+16:36:44.409 [main] ERROR testCase.TC4_Verify_Appointment_Limit - Test failed
+21:58:35.311 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- User on logged in home page click on book appoinment ---
+21:58:37.724 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- user select the mode of experts---
+21:58:38.040 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- user select the experts and modes ---
+21:58:45.770 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- select mode of contact ---
+21:58:48.680 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- Booking review ---
+21:58:59.348 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- Appoinment Booked ---
+21:58:59.517 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- Home page screenshot taken 
+21:58:59.517 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- Script Ended ---
+21:58:59.517 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- User on logged in home page click on book appoinment ---
+21:59:00.039 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- user select the mode of experts---
+21:59:00.230 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- user select the experts and modes ---
+21:59:06.870 [main] INFO  testCase.TC4_Verify_Appointment_Limit - --- select mode of contact ---
+21:59:16.969 [main] ERROR testCase.TC4_Verify_Appointment_Limit - Test failed
