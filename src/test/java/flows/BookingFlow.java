@@ -35,44 +35,44 @@ public class BookingFlow {
 		logger.info("--- user select the experts and modes ---");
 		Experts_Page Ep=new Experts_Page(driver);
 		Ep.select_category();
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
 		Ep.select_language();
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
 		Ep.select_mode();
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
 		Ep.select_gender();
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
 		Ep.c_bookappoinment();
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
 		
 		logger.info("--- select mode of contact ---");
 		Contact_Mode Cm=new Contact_Mode(driver);
 		Cm.clk_video(0);
 		Cm.clk_date();
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
         Cm.clk_time();
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
 		
 		logger.info("--- Booking review ---");
 		Booking_Review Br=new Booking_Review(driver);
 		Br.select_category();
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
 		Br.select_subcategory();
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
 		Br.select_city();
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
 		Br.clk_checkbox();
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
 		Br.clk_Bookappoinment();
 		
 		
 		Booking_Confirmation Bc=new Booking_Confirmation(driver);
 		Assert.assertTrue(Bc.Appoinmentconfirm_isdisplay(), "Appoinment confirmation is not displayed");
 		BaseClass.CaptureScreen("Appoinment Confirmation");
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
 		Bc.clk_skipbtn();
 		Bc.clk_gohomebtn();
-		Thread.sleep(3000);
+		Thread.sleep(1000);
 		logger.info("--- Appoinment Booked ---");
 		
 		BaseClass.CaptureScreen("Upcoming Video Appointments");
