@@ -34,4 +34,4 @@ jobs:
         run: mvn -version
 
       - name: Run TestNG Suite
-        run: mvn clean test -DsuiteXmlFile=master.xml
+        run: mvn clean test
