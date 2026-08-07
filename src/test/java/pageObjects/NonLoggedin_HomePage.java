@@ -24,9 +24,6 @@ public class NonLoggedin_HomePage extends BasePage{
 	{
 		 BaseClass.CaptureScreen("Before_Click");
 
-		    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-
-		    wait.until(ExpectedConditions.visibilityOf(loginbtn));
 		loginbtn.click();
 	}
 }
