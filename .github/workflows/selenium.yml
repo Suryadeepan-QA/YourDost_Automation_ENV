@@ -27,32 +27,11 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Verify Java Version
+      - name: Verify Java
         run: java -version
 
-      - name: Verify Maven Version
+      - name: Verify Maven
         run: mvn -version
 
-      - name: Execute TestNG Suite
+      - name: Run TestNG Suite
         run: mvn clean test -DsuiteXmlFile=master.xml
-
-      - name: Upload TestNG Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: TestNG-Report
-          path: test-output
-
-      - name: Upload Extent Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Extent-Report
-          path: reports
-
-      - name: Upload Screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Screenshots
-          path: screenshots
