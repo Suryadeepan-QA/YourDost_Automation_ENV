@@ -1,5 +1,6 @@
 package pageObjects;
 
+import java.io.IOException;
 import java.time.Duration;
 
 import org.openqa.selenium.WebDriver;
@@ -7,6 +8,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import testBase.BaseClass;
 
 public class NonLoggedin_HomePage extends BasePage{
 
@@ -17,11 +20,13 @@ public class NonLoggedin_HomePage extends BasePage{
 	@FindBy(xpath="//button[@class='NavigationBar_loginButton__wbY8a' and text()=\"Login/Signup\"]")
 	WebElement loginbtn;
 	
-	public void clickloginbtn()
+	public void clickloginbtn() throws IOException
 	{
-		  WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-	        wait.until(ExpectedConditions.elementToBeClickable(loginbtn));
+		 BaseClass.CaptureScreen("Before_Click");
 
+		    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+
+		    wait.until(ExpectedConditions.visibilityOf(loginbtn));
 		loginbtn.click();
 	}
 }

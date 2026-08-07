@@ -1,5 +1,7 @@
 package testCase;
 
+import java.io.IOException;
+
 import org.testng.annotations.Test;
 
 import pageObjects.Login_Popup;
@@ -9,7 +11,7 @@ import testBase.BaseClass;
 
 public class TC1_VerifyUserLogin extends BaseClass {
 	@Test
-	public void Verify_login()
+	public void Verify_login() throws IOException
 	{
 		logger.info("----- I click on the home page login/signup button ------");
 		NonLoggedin_HomePage Hp=new NonLoggedin_HomePage(driver);

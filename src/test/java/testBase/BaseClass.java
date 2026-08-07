@@ -71,7 +71,7 @@ public class BaseClass {
 	    return generatednumber;	
 	}
 	
-	public void login() throws InterruptedException {
+	public void login() throws InterruptedException, IOException {
 
 	    NonLoggedin_HomePage hp = new NonLoggedin_HomePage(driver);
 	    hp.clickloginbtn();

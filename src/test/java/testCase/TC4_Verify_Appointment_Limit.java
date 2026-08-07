@@ -1,5 +1,7 @@
 package testCase;
 
+import java.io.IOException;
+
 import org.testng.annotations.Test;
 
 import flows.BookingFlow;
@@ -10,7 +12,7 @@ import testBase.BaseClass;
 
 public class TC4_Verify_Appointment_Limit extends BaseClass {
 	@Test
-	public void appoinment_limit() throws InterruptedException
+	public void appoinment_limit() throws InterruptedException, IOException
 	{
 		
 		login();

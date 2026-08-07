@@ -1,5 +1,7 @@
 package testCase;
 
+import java.io.IOException;
+
 import org.testng.annotations.Test;
 
 import pageObjects.Cancel_Appoinments;
@@ -11,7 +13,7 @@ import testBase.BaseClass;
 public class TC3_Verify_Cancel_Appointments extends BaseClass{
 
 	@Test(groups= {"Functional"})
-	public void cancel_appoinments() throws InterruptedException
+	public void cancel_appoinments() throws InterruptedException, IOException
 	{
 		NonLoggedin_HomePage Hp=new NonLoggedin_HomePage(driver);
 		Hp.clickloginbtn();
