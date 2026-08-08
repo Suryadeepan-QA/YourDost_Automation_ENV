@@ -16,7 +16,7 @@ public class Experts_Page extends BasePage{
 	@FindBy(xpath="//mat-select[@name='category']")
 	WebElement clk_category;
 	
-	@FindBy(xpath="//span[normalize-space()='Career']")
+	@FindBy(xpath="//mat-option//span[normalize-space()='Career']")
 	WebElement select_category;
 	
 	@FindBy(xpath="//mat-select[@name='language']")
