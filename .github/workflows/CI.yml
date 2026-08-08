@@ -9,6 +9,7 @@ on:
 
 jobs:
   test:
+
     runs-on: windows-latest
 
     steps:
@@ -19,6 +20,15 @@ jobs:
 
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      # =========================================================
+      # SET SCREEN RESOLUTION
+      # =========================================================
+
+      - name: Set Windows Screen Resolution
+        run: |
+          Set-DisplayResolution -Width 1920 -Height 1080
+        shell: powershell
 
       # =========================================================
       # JAVA
@@ -46,14 +56,6 @@ jobs:
         run: mvn -version
 
       # =========================================================
-      # CREATE SCREENSHOT DIRECTORY
-      # =========================================================
-
-      - name: Create Screenshot Directory
-        run: |
-          New-Item -ItemType Directory -Force -Path target/screenshots
-
-      # =========================================================
       # RUN TESTNG
       # =========================================================
 
@@ -72,7 +74,7 @@ jobs:
 
           path: |
             target/surefire-reports/
-            target/screenshots/
             test-output/
+            target/screenshots/
 
           if-no-files-found: ignore
