@@ -23,67 +23,84 @@ public class Logout_Page extends BasePage {
     }
 
     // =========================================================
-    // USER PROFILE BUTTON
+    // USERNAME - USED TO VERIFY LOGIN SUCCESS
     // =========================================================
 
     /*
-     * Actual HTML:
+     * HTML:
+     *
+     * <div class="DesktopNavBar_nameText__hAqgn">
+     *     surya99
+     * </div>
+     *
+     * We intentionally use contains() because the
+     * DesktopNavBar_nameText class suffix can change.
+     */
+    @FindBy(xpath = "//div[contains(@class,'DesktopNavBar_nameText')]")
+    private WebElement username;
+
+
+    // =========================================================
+    // PROFILE BUTTON
+    // =========================================================
+
+    /*
+     * Actual clickable element from your HTML:
      *
      * <div class="DesktopNavBar_usernameContainer__35kIp">
+     *
      *     <button ... aria-haspopup="true">
      *         <div class="MuiAvatar-root ...">S</div>
      *     </button>
-     *     <div class="DesktopNavBar_nameText__hAqgn">surya99</div>
+     *
+     *     <div class="DesktopNavBar_nameText__hAqgn">
+     *         surya99
+     *     </div>
+     *
      * </div>
      *
-     * The clickable element is the BUTTON.
+     * Therefore we click the BUTTON, not the parent div.
      */
+    private By profileButton = By.xpath(
+            "//div[contains(@class,'DesktopNavBar_usernameContainer')]//button"
+    );
 
-    @FindBy(xpath =
-            "//div[contains(@class,'DesktopNavBar_usernameContainer')]//button")
-    private WebElement usericon;
 
     // =========================================================
     // LOGOUT BUTTON
     // =========================================================
 
-    @FindBy(xpath =
-            "//li[normalize-space()='Logout']")
+    @FindBy(xpath = "//li[normalize-space()='Logout']")
     private WebElement btn_logout;
 
 
     // =========================================================
-    // VERIFY LOGIN
+    // VERIFY LOGIN SUCCESS
     // =========================================================
 
     public void verifyLoginSuccess() {
 
+        System.out.println();
         System.out.println("==============================================");
-        System.out.println("VERIFYING LOGIN SUCCESS");
+        System.out.println("STARTING LOGIN VERIFICATION");
         System.out.println("==============================================");
 
         try {
 
             // -------------------------------------------------
-            // STEP 1: Print current URL
+            // 1. Print current URL
             // -------------------------------------------------
 
-            System.out.println(
-                    "Current URL BEFORE verification: "
-                    + driver.getCurrentUrl()
-            );
+            System.out.println("Current URL: " + driver.getCurrentUrl());
 
             // -------------------------------------------------
-            // STEP 2: Print current page title
+            // 2. Print current title
             // -------------------------------------------------
 
-            System.out.println(
-                    "Current Title BEFORE verification: "
-                    + driver.getTitle()
-            );
+            System.out.println("Current Title: " + driver.getTitle());
 
             // -------------------------------------------------
-            // STEP 3: Wait until dashboard URL is available
+            // 3. Wait for dashboard URL
             // -------------------------------------------------
 
             System.out.println("Waiting for dashboard URL...");
@@ -92,208 +109,79 @@ public class Logout_Page extends BasePage {
                     ExpectedConditions.urlContains("/userDashboard")
             );
 
-            System.out.println(
-                    "Dashboard URL detected: "
-                    + driver.getCurrentUrl()
-            );
+            System.out.println("Dashboard URL detected.");
 
             // -------------------------------------------------
-            // STEP 4: DIAGNOSTICS
+            // 4. Diagnostics
             // -------------------------------------------------
 
-            System.out.println("----------------------------------------------");
+            System.out.println();
             System.out.println("STARTING PROFILE BUTTON DIAGNOSTICS");
-            System.out.println("----------------------------------------------");
 
-            By profileButton = By.xpath(
-                    "//div[contains(@class,'DesktopNavBar_usernameContainer')]//button"
-            );
-
-            By usernameContainer = By.xpath(
-                    "//div[contains(@class,'DesktopNavBar_usernameContainer')]"
-            );
-
-            By usernameText = By.xpath(
+            By usernameLocator = By.xpath(
                     "//div[contains(@class,'DesktopNavBar_nameText')]"
             );
 
-            // Count profile buttons
-            int profileButtonCount =
-                    driver.findElements(profileButton).size();
-
-            System.out.println(
-                    "Profile button count: "
-                    + profileButtonCount
+            By profileContainerLocator = By.xpath(
+                    "//div[contains(@class,'DesktopNavBar_usernameContainer')]"
             );
 
-            // Count username containers
-            int usernameContainerCount =
-                    driver.findElements(usernameContainer).size();
-
-            System.out.println(
-                    "Username container count: "
-                    + usernameContainerCount
+            By profileButtonLocator = By.xpath(
+                    "//div[contains(@class,'DesktopNavBar_usernameContainer')]//button"
             );
 
-            // Count username text
-            int usernameTextCount =
-                    driver.findElements(usernameText).size();
+            System.out.println(
+                    "Username elements found: "
+                    + driver.findElements(usernameLocator).size()
+            );
 
             System.out.println(
-                    "Username text count: "
-                    + usernameTextCount
+                    "Profile containers found: "
+                    + driver.findElements(profileContainerLocator).size()
+            );
+
+            System.out.println(
+                    "Profile buttons found: "
+                    + driver.findElements(profileButtonLocator).size()
             );
 
             // -------------------------------------------------
-            // STEP 5: Check username text if available
+            // 5. Verify username
             // -------------------------------------------------
 
-            if (usernameTextCount > 0) {
+            System.out.println();
+            System.out.println("Waiting for username...");
 
-                try {
-
-                    WebElement username =
-                            driver.findElement(usernameText);
-
-                    System.out.println(
-                            "Username displayed: "
-                            + username.getText()
-                    );
-
-                    System.out.println(
-                            "Username visible: "
-                            + username.isDisplayed()
-                    );
-
-                } catch (Exception e) {
-
-                    System.out.println(
-                            "Could not read username: "
-                            + e.getMessage()
-                    );
-                }
-
-            } else {
-
-                System.out.println(
-                        "Username element was NOT found."
-                );
-            }
-
-            // -------------------------------------------------
-            // STEP 6: Check profile button visibility
-            // -------------------------------------------------
-
-            if (profileButtonCount > 0) {
-
-                try {
-
-                    WebElement profile =
-                            driver.findElement(profileButton);
-
-                    System.out.println(
-                            "Profile button visible: "
-                            + profile.isDisplayed()
-                    );
-
-                    System.out.println(
-                            "Profile button enabled: "
-                            + profile.isEnabled()
-                    );
-
-                } catch (Exception e) {
-
-                    System.out.println(
-                            "Could not inspect profile button: "
-                            + e.getMessage()
-                    );
-                }
-
-            } else {
-
-                System.out.println(
-                        "PROFILE BUTTON NOT FOUND."
-                );
-            }
-
-            // -------------------------------------------------
-            // STEP 7: Print page source information
-            // -------------------------------------------------
-
-            System.out.println("----------------------------------------------");
-            System.out.println("PAGE SOURCE CHECK");
-            System.out.println("----------------------------------------------");
-
-            String pageSource = driver.getPageSource();
-
-            if (pageSource.contains("DesktopNavBar_usernameContainer")) {
-
-                System.out.println(
-                        "DesktopNavBar_usernameContainer EXISTS in page source."
-                );
-
-            } else {
-
-                System.out.println(
-                        "DesktopNavBar_usernameContainer DOES NOT EXIST in page source."
-                );
-            }
-
-            if (pageSource.contains("surya99")) {
-
-                System.out.println(
-                        "Username 'surya99' EXISTS in page source."
-                );
-
-            } else {
-
-                System.out.println(
-                        "Username 'surya99' DOES NOT EXIST in page source."
-                );
-            }
-
-            // -------------------------------------------------
-            // STEP 8: Wait for profile button
-            // -------------------------------------------------
-
-            System.out.println("----------------------------------------------");
-            System.out.println(
-                    "Waiting for profile button to appear..."
+            wait.until(
+                    ExpectedConditions.visibilityOf(username)
             );
+
+            System.out.println(
+                    "Username found: " + username.getText()
+            );
+
+            // -------------------------------------------------
+            // 6. Verify profile button
+            // -------------------------------------------------
+
+            System.out.println();
+            System.out.println("Waiting for profile button...");
 
             wait.until(
                     ExpectedConditions.presenceOfElementLocated(
-                            profileButton
+                            profileButtonLocator
                     )
             );
 
-            System.out.println(
-                    "Profile button is PRESENT in DOM."
-            );
+            System.out.println("Profile button found.");
 
-            // -------------------------------------------------
-            // STEP 9: Wait for profile button visibility
-            // -------------------------------------------------
-
-            wait.until(
-                    ExpectedConditions.visibilityOfElementLocated(
-                            profileButton
-                    )
-            );
-
-            System.out.println(
-                    "Profile button is VISIBLE."
-            );
-
-            System.out.println("==============================================");
+            System.out.println();
             System.out.println("LOGIN VERIFICATION SUCCESSFUL");
-            System.out.println("==============================================");
 
         } catch (Exception e) {
 
-            System.out.println("==============================================");
+            System.out.println();
             System.out.println("LOGIN VERIFICATION FAILED");
-            System.out.println("==============================================");
 
             System.out.println(
                     "Current URL after failure: "
@@ -306,9 +194,55 @@ public class Logout_Page extends BasePage {
             );
 
             System.out.println(
-                    "Reason: "
-                    + e.getMessage()
+                    "Reason: " + e.getMessage()
             );
+
+            // -------------------------------------------------
+            // PAGE SOURCE DIAGNOSTICS
+            // -------------------------------------------------
+
+            try {
+
+                String pageSource = driver.getPageSource();
+
+                System.out.println();
+                System.out.println("==============================================");
+                System.out.println("PAGE SOURCE CHECK");
+                System.out.println("==============================================");
+
+                if (pageSource.contains("DesktopNavBar")) {
+
+                    System.out.println(
+                            "DesktopNavBar FOUND in page source."
+                    );
+
+                } else {
+
+                    System.out.println(
+                            "DesktopNavBar NOT FOUND in page source."
+                    );
+                }
+
+                if (pageSource.contains("surya99")) {
+
+                    System.out.println(
+                            "Username 'surya99' FOUND in page source."
+                    );
+
+                } else {
+
+                    System.out.println(
+                            "Username 'surya99' NOT FOUND in page source."
+                    );
+                }
+
+            } catch (Exception sourceException) {
+
+                System.out.println(
+                        "Unable to read page source: "
+                        + sourceException.getMessage()
+                );
+            }
 
             throw e;
         }
@@ -321,51 +255,47 @@ public class Logout_Page extends BasePage {
 
     public void logout_session() {
 
+        System.out.println();
         System.out.println("==============================================");
         System.out.println("STARTING LOGOUT");
         System.out.println("==============================================");
 
-        WebDriverWait logoutWait =
-                new WebDriverWait(driver, Duration.ofSeconds(15));
-
         try {
 
             // -------------------------------------------------
-            // STEP 1: Print current URL
+            // 1. Make sure we are on dashboard
             // -------------------------------------------------
 
-            System.out.println(
-                    "Current URL before logout: "
-                    + driver.getCurrentUrl()
-            );
-
-            // -------------------------------------------------
-            // STEP 2: Wait for dashboard
-            // -------------------------------------------------
-
-            logoutWait.until(
+            wait.until(
                     ExpectedConditions.urlContains("/userDashboard")
             );
 
+            System.out.println(
+                    "Dashboard page confirmed."
+            );
+
             // -------------------------------------------------
-            // STEP 3: Profile button locator
+            // 2. Profile button locator
             // -------------------------------------------------
 
-            By profileButton = By.xpath(
+            By profileButtonLocator = By.xpath(
                     "//div[contains(@class,'DesktopNavBar_usernameContainer')]//button"
             );
 
             // -------------------------------------------------
-            // STEP 4: Check whether profile button exists
+            // 3. Diagnostics
             // -------------------------------------------------
 
             int profileCount =
-                    driver.findElements(profileButton).size();
+                    driver.findElements(profileButtonLocator).size();
 
             System.out.println(
-                    "Profile button count during logout: "
-                    + profileCount
+                    "Profile button count: " + profileCount
             );
+
+            // -------------------------------------------------
+            // 4. If profile button does not exist
+            // -------------------------------------------------
 
             if (profileCount == 0) {
 
@@ -381,17 +311,17 @@ public class Logout_Page extends BasePage {
             }
 
             // -------------------------------------------------
-            // STEP 5: Wait for profile button clickable
+            // 5. Wait for profile button
             // -------------------------------------------------
 
             System.out.println(
                     "Waiting for profile button to become clickable..."
             );
 
-            WebElement user =
-                    logoutWait.until(
+            WebElement profileButton =
+                    wait.until(
                             ExpectedConditions.elementToBeClickable(
-                                    profileButton
+                                    profileButtonLocator
                             )
                     );
 
@@ -400,61 +330,146 @@ public class Logout_Page extends BasePage {
             );
 
             // -------------------------------------------------
-            // STEP 6: Click profile button
+            // 6. Scroll profile button into view
             // -------------------------------------------------
 
-            user.click();
-
-            System.out.println(
-                    "Profile button clicked."
-            );
+            ((org.openqa.selenium.JavascriptExecutor) driver)
+                    .executeScript(
+                            "arguments[0].scrollIntoView({block:'center'});",
+                            profileButton
+                    );
 
             // -------------------------------------------------
-            // STEP 7: Logout button
+            // 7. Click profile button
             // -------------------------------------------------
 
-            By logoutButton = By.xpath(
-                    "//li[normalize-space()='Logout']"
-            );
+            try {
+
+                System.out.println(
+                        "Clicking profile button..."
+                );
+
+                profileButton.click();
+
+                System.out.println(
+                        "Profile button clicked normally."
+                );
+
+            } catch (Exception clickException) {
+
+                System.out.println(
+                        "Normal profile click failed."
+                );
+
+                System.out.println(
+                        "Trying JavaScript click..."
+                );
+
+                ((org.openqa.selenium.JavascriptExecutor) driver)
+                        .executeScript(
+                                "arguments[0].click();",
+                                profileButton
+                        );
+
+                System.out.println(
+                        "Profile button clicked using JavaScript."
+                );
+            }
+
+            // -------------------------------------------------
+            // 8. Wait for Logout button
+            // -------------------------------------------------
 
             System.out.println(
                     "Waiting for Logout button..."
             );
 
-            WebElement logout =
-                    logoutWait.until(
+            By logoutButtonLocator = By.xpath(
+                    "//li[normalize-space()='Logout']"
+            );
+
+            WebElement logoutButton =
+                    wait.until(
                             ExpectedConditions.elementToBeClickable(
-                                    logoutButton
+                                    logoutButtonLocator
                             )
                     );
 
-            // -------------------------------------------------
-            // STEP 8: Click Logout
-            // -------------------------------------------------
-
-            logout.click();
-
             System.out.println(
-                    "Logout button clicked."
+                    "Logout button found."
             );
 
-            System.out.println(
-                    "Logout successful."
-            );
+            // -------------------------------------------------
+            // 9. Click Logout
+            // -------------------------------------------------
+
+            try {
+
+                logoutButton.click();
+
+                System.out.println(
+                        "Logout clicked normally."
+                );
+
+            } catch (Exception logoutClickException) {
+
+                System.out.println(
+                        "Normal logout click failed."
+                );
+
+                System.out.println(
+                        "Trying JavaScript click..."
+                );
+
+                ((org.openqa.selenium.JavascriptExecutor) driver)
+                        .executeScript(
+                                "arguments[0].click();",
+                                logoutButton
+                        );
+
+                System.out.println(
+                        "Logout clicked using JavaScript."
+                );
+            }
+
+            // -------------------------------------------------
+            // 10. Wait for logout navigation
+            // -------------------------------------------------
+
+            try {
+
+                wait.until(
+                        ExpectedConditions.not(
+                                ExpectedConditions.urlContains(
+                                        "/userDashboard"
+                                )
+                        )
+                );
+
+                System.out.println(
+                        "Logout successful."
+                );
+
+            } catch (Exception logoutNavigationException) {
+
+                System.out.println(
+                        "Logout click completed, but dashboard URL "
+                        + "is still present."
+                );
+
+                System.out.println(
+                        "Current URL: "
+                        + driver.getCurrentUrl()
+                );
+            }
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "=============================================="
-            );
+            System.out.println();
+            System.out.println("LOGOUT FAILED");
 
             System.out.println(
-                    "LOGOUT FAILED"
-            );
-
-            System.out.println(
-                    "Reason: "
-                    + e.getMessage()
+                    "Reason: " + e.getMessage()
             );
 
             System.out.println(
@@ -468,11 +483,11 @@ public class Logout_Page extends BasePage {
             );
 
             System.out.println(
-                    "=============================================="
+                    "Logout cleanup finished with warning."
             );
 
             // Do NOT throw the exception here.
-            // Logout should not make the actual test fail.
+            // This allows @AfterClass to close the browser.
         }
     }
 }
