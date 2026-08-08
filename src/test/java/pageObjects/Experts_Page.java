@@ -921,26 +921,152 @@ public class Experts_Page extends BasePage {
         );
 
         /*
-         * Make sure no Angular Material overlay is blocking
-         * the button.
+         * Make sure any Angular Material overlay/backdrop
+         * from the previous dropdown is completely gone.
          */
         waitForAnyOverlayToDisappear();
 
-        wait.until(
-                ExpectedConditions.visibilityOf(
-                        clk_bookAppoinment
-                )
+        /*
+         * Find the actual clickable button instead of clicking
+         * directly on the span.
+         */
+        By bookAppointmentButton = By.xpath(
+                "//span[normalize-space()='BOOK APPOINTMENT']"
+                + "/ancestor::button[1]"
         );
 
-        wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        clk_bookAppoinment
-                )
-        ).click();
+        try {
 
-        System.out.println(
-                "BOOK APPOINTMENT CLICKED."
-        );
+            /*
+             * Wait until the button exists.
+             */
+            WebElement button =
+                    wait.until(
+                            ExpectedConditions.presenceOfElementLocated(
+                                    bookAppointmentButton
+                            )
+                    );
+
+            System.out.println(
+                    "BOOK APPOINTMENT BUTTON FOUND."
+            );
+
+            /*
+             * Scroll the button to the center of the viewport.
+             */
+            ((org.openqa.selenium.JavascriptExecutor) driver)
+                    .executeScript(
+                            "arguments[0].scrollIntoView({"
+                                    + "block:'center',"
+                                    + "inline:'center'"
+                                    + "});",
+                            button
+                    );
+
+            System.out.println(
+                    "BOOK APPOINTMENT BUTTON SCROLLED INTO VIEW."
+            );
+
+            /*
+             * Wait until Selenium considers it clickable.
+             */
+            wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            button
+                    )
+            );
+
+            System.out.println(
+                    "BOOK APPOINTMENT BUTTON IS CLICKABLE."
+            );
+
+            /*
+             * Normal Selenium click first.
+             */
+            try {
+
+                button.click();
+
+                System.out.println(
+                        "BOOK APPOINTMENT CLICKED SUCCESSFULLY."
+                );
+
+            } catch (org.openqa.selenium.ElementClickInterceptedException e) {
+
+                System.out.println(
+                        "Normal click intercepted."
+                );
+
+                System.out.println(
+                        "Trying JavaScript click..."
+                );
+
+                /*
+                 * If another transparent/animated element is still
+                 * covering the button in GitHub Actions, JS click
+                 * bypasses the physical hit-test.
+                 */
+                ((org.openqa.selenium.JavascriptExecutor) driver)
+                        .executeScript(
+                                "arguments[0].click();",
+                                button
+                        );
+
+                System.out.println(
+                        "BOOK APPOINTMENT CLICKED USING JAVASCRIPT."
+                );
+            }
+
+        } catch (Exception e) {
+
+            takeScreenshot(
+                    "book-appointment-click-failure"
+            );
+
+            System.out.println(
+                    "================================================="
+            );
+
+            System.out.println(
+                    "BOOK APPOINTMENT CLICK FAILED"
+            );
+
+            System.out.println(
+                    "================================================="
+            );
+
+            try {
+
+                System.out.println(
+                        "Current URL: "
+                                + driver.getCurrentUrl()
+                );
+
+                System.out.println(
+                        "Page title: "
+                                + driver.getTitle()
+                );
+
+                System.out.println(
+                        "Book Appointment buttons found: "
+                                + driver.findElements(
+                                        bookAppointmentButton
+                                ).size()
+                );
+
+            } catch (Exception diagnosticException) {
+
+                System.out.println(
+                        "Unable to collect diagnostic information: "
+                                + diagnosticException.getMessage()
+                );
+            }
+
+            throw new RuntimeException(
+                    "BOOK APPOINTMENT click failed.",
+                    e
+            );
+        }
     }
 
     // =========================================================
