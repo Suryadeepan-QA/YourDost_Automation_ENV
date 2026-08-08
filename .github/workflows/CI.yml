@@ -25,11 +25,9 @@ jobs:
         run: java -version
 
       - name: Verify Maven
-        working-directory: yourdost_Automation
         run: mvn -version
 
       - name: Run TestNG Suite
-        working-directory: yourdost_Automation
         run: mvn clean test
 
       - name: Upload TestNG Reports
@@ -38,6 +36,6 @@ jobs:
         with:
           name: testng-reports
           path: |
-            yourdost_Automation/target/surefire-reports/
-            yourdost_Automation/test-output/
+            target/surefire-reports/
+            test-output/
           if-no-files-found: ignore
