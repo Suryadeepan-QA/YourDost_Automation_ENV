@@ -1,7 +1,6 @@
 package pageObjects;
 
 import java.time.Duration;
-import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -16,7 +15,15 @@ public class Logout_Page extends BasePage {
 
     public Logout_Page(WebDriver driver) {
         super(driver);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        /*
+         * GitHub Actions can be slower than local execution.
+         * Give the page enough time to render the navbar.
+         */
+        wait = new WebDriverWait(
+                driver,
+                Duration.ofSeconds(30)
+        );
     }
 
     // =========================================================
@@ -36,7 +43,7 @@ public class Logout_Page extends BasePage {
     public void verifyLoginSuccess() {
 
         System.out.println(
-                "Checking whether user is logged in..."
+                "Waiting for logged-in user icon..."
         );
 
         wait.until(
@@ -69,38 +76,33 @@ public class Logout_Page extends BasePage {
         try {
 
             /*
-             * First check whether the username/user icon
-             * actually exists on the current page.
-             *
-             * findElements() does not throw TimeoutException.
+             * Print the current page information.
+             * This is very useful in GitHub Actions.
              */
-            By userIconLocator = By.xpath(
-                    "//div[contains(@class,'DesktopNavBar_usernameContainer')]"
+            System.out.println(
+                    "Current URL before logout: "
+                            + driver.getCurrentUrl()
             );
 
-            List<WebElement> userIcons =
-                    driver.findElements(userIconLocator);
+            System.out.println(
+                    "Current page title: "
+                            + driver.getTitle()
+            );
 
-            if (userIcons.isEmpty()) {
+            // -------------------------------------------------
+            // STEP 1: WAIT FOR USER ICON
+            // -------------------------------------------------
 
-                System.out.println(
-                        "User icon is not present on the current page."
-                );
+            System.out.println(
+                    "Waiting for user icon..."
+            );
 
-                System.out.println(
-                        "Skipping logout."
-                );
-
-                return;
-            }
-
-            /*
-             * Wait for user icon to become clickable.
-             */
             WebElement user =
                     wait.until(
                             ExpectedConditions.elementToBeClickable(
-                                    userIconLocator
+                                    By.xpath(
+                                            "//div[contains(@class,'DesktopNavBar_usernameContainer')]"
+                                    )
                             )
                     );
 
@@ -108,9 +110,10 @@ public class Logout_Page extends BasePage {
                     "User icon found."
             );
 
-            /*
-             * Scroll into view before clicking.
-             */
+            // -------------------------------------------------
+            // STEP 2: SCROLL USER ICON INTO VIEW
+            // -------------------------------------------------
+
             ((org.openqa.selenium.JavascriptExecutor) driver)
                     .executeScript(
                             "arguments[0].scrollIntoView({"
@@ -120,18 +123,25 @@ public class Logout_Page extends BasePage {
                             user
                     );
 
-            /*
-             * Try normal Selenium click.
-             */
+            System.out.println(
+                    "User icon scrolled into view."
+            );
+
+            // -------------------------------------------------
+            // STEP 3: CLICK USER ICON
+            // -------------------------------------------------
+
             try {
 
                 user.click();
 
                 System.out.println(
-                        "User icon clicked."
+                        "User icon clicked successfully."
                 );
 
-            } catch (org.openqa.selenium.ElementClickInterceptedException e) {
+            } catch (
+                    org.openqa.selenium.ElementClickInterceptedException e
+            ) {
 
                 System.out.println(
                         "User icon click intercepted."
@@ -153,33 +163,19 @@ public class Logout_Page extends BasePage {
             }
 
             // -------------------------------------------------
-            // Wait for Logout option
+            // STEP 4: WAIT FOR LOGOUT OPTION
             // -------------------------------------------------
 
-            By logoutLocator = By.xpath(
-                    "//li[normalize-space()='Logout']"
+            System.out.println(
+                    "Waiting for Logout option..."
             );
-
-            List<WebElement> logoutElements =
-                    driver.findElements(logoutLocator);
-
-            if (logoutElements.isEmpty()) {
-
-                System.out.println(
-                        "Logout option is not present."
-                );
-
-                System.out.println(
-                        "Skipping logout."
-                );
-
-                return;
-            }
 
             WebElement logoutButton =
                     wait.until(
                             ExpectedConditions.elementToBeClickable(
-                                    logoutLocator
+                                    By.xpath(
+                                            "//li[normalize-space()='Logout']"
+                                    )
                             )
                     );
 
@@ -187,9 +183,10 @@ public class Logout_Page extends BasePage {
                     "Logout option found."
             );
 
-            /*
-             * Try normal click.
-             */
+            // -------------------------------------------------
+            // STEP 5: CLICK LOGOUT
+            // -------------------------------------------------
+
             try {
 
                 logoutButton.click();
@@ -198,7 +195,9 @@ public class Logout_Page extends BasePage {
                         "Logout clicked successfully."
                 );
 
-            } catch (org.openqa.selenium.ElementClickInterceptedException e) {
+            } catch (
+                    org.openqa.selenium.ElementClickInterceptedException e
+            ) {
 
                 System.out.println(
                         "Logout click intercepted."
@@ -219,39 +218,60 @@ public class Logout_Page extends BasePage {
                 );
             }
 
+            System.out.println(
+                    "Logout completed successfully."
+            );
+
         } catch (Exception e) {
+
+            /*
+             * Print diagnostics.
+             */
+            System.out.println(
+                    "================================================="
+            );
+
+            System.out.println(
+                    "LOGOUT FAILED"
+            );
+
+            System.out.println(
+                    "================================================="
+            );
+
+            System.out.println(
+                    "Reason: "
+                            + e.getMessage()
+            );
+
+            try {
+
+                System.out.println(
+                        "Current URL after logout failure: "
+                                + driver.getCurrentUrl()
+                );
+
+                System.out.println(
+                        "Current title after logout failure: "
+                                + driver.getTitle()
+                );
+
+            } catch (Exception ignored) {
+
+                System.out.println(
+                        "Unable to read current page information."
+                );
+            }
 
             /*
              * Logout is cleanup.
              *
-             * Do not throw the exception here because a logout
-             * problem should not hide the actual result of the
-             * booking test.
+             * Do not fail the actual test because of logout.
              */
             System.out.println(
-                    "Logout could not be completed."
-            );
-
-            System.out.println(
-                    "Reason: " + e.getMessage()
-            );
-
-            System.out.println(
-                    "Continuing test cleanup..."
+                    "Logout cleanup finished with warning."
             );
         }
-
-        System.out.println(
-                "================================================="
-        );
-
-        System.out.println(
-                "LOGOUT PROCESS COMPLETED"
-        );
-
-        System.out.println(
-                "================================================="
-        );
     }
 }
 
