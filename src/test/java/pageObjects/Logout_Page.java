@@ -41,13 +41,41 @@ public class Logout_Page {
     // LOCATORS
     // =========================================================
 
-    // Mobile 3-line menu
-    private final By mobileMenuButton =
-            By.cssSelector("svg[data-testid='MenuIcon']");
+    /*
+     * Mobile hamburger menu.
+     *
+     * HTML:
+     * <svg data-testid="MenuIcon">
+     */
+    private final By menuButton =
+            By.cssSelector("[data-testid='MenuIcon']");
 
-    // Logout option inside mobile menu
-    private final By mobileLogoutButton =
+    /*
+     * Logout option inside mobile menu.
+     *
+     * HTML:
+     * <span>Logout</span>
+     */
+    private final By logoutButton =
             By.xpath("//span[normalize-space()='Logout']");
+
+    // =========================================================
+    // SCREENSHOT DIRECTORY
+    // =========================================================
+
+    private String getScreenshotDirectory() {
+
+        String directory =
+                "target/screenshots/login";
+
+        File file = new File(directory);
+
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+
+        return directory;
+    }
 
     // =========================================================
     // SCREENSHOT
@@ -64,32 +92,22 @@ public class Logout_Page {
                             )
                     );
 
-            String directory =
-                    "target/screenshots/logout";
-
-            File file =
-                    new File(directory);
-
-            if (!file.exists()) {
-                file.mkdirs();
-            }
-
             String screenshotPath =
-                    directory
+                    getScreenshotDirectory()
                     + "/"
                     + name
                     + "_"
                     + timestamp
                     + ".png";
 
-            File screenshot =
+            File screenshotFile =
                     ((TakesScreenshot) driver)
                             .getScreenshotAs(
                                     OutputType.FILE
                             );
 
             Files.copy(
-                    screenshot.toPath(),
+                    screenshotFile.toPath(),
                     Paths.get(screenshotPath),
                     StandardCopyOption.REPLACE_EXISTING
             );
@@ -97,23 +115,41 @@ public class Logout_Page {
         } catch (IOException e) {
 
             System.out.println(
-                    "Unable to save screenshot: "
+                    "Screenshot failed: "
                     + e.getMessage()
             );
         }
     }
 
     // =========================================================
-    // LOGOUT
+    // WAIT FOR PAGE LOAD
     // =========================================================
 
-    public void logout_session() {
+    private void waitForPageToLoad() {
+
+        wait.until(
+                webDriver -> {
+
+                    Object state =
+                            ((JavascriptExecutor) webDriver)
+                                    .executeScript(
+                                            "return document.readyState"
+                                    );
+
+                    return "complete".equals(state);
+                }
+        );
+    }
+
+    // =========================================================
+    // VERIFY LOGIN SUCCESS
+    // =========================================================
+
+    public void verifyLoginSuccess() {
 
         try {
 
-            // -------------------------------------------------
-            // 1. Wait for dashboard
-            // -------------------------------------------------
+            waitForPageToLoad();
 
             wait.until(
                     ExpectedConditions.urlContains(
@@ -121,43 +157,91 @@ public class Logout_Page {
                     )
             );
 
-            // -------------------------------------------------
-            // 2. Click mobile 3-line menu
-            // -------------------------------------------------
+        } catch (Exception e) {
+
+            captureScreenshot(
+                    "login_verification_failed"
+            );
+
+            throw new RuntimeException(
+                    "Login verification failed: "
+                    + e.getMessage(),
+                    e
+            );
+        }
+    }
+
+    // =========================================================
+    // CLICK MOBILE MENU
+    // =========================================================
+
+    private void clickMenu() {
+
+        try {
 
             WebElement menu =
                     wait.until(
-                            ExpectedConditions.elementToBeClickable(
-                                    mobileMenuButton
-                            )
+                            ExpectedConditions
+                                    .elementToBeClickable(
+                                            menuButton
+                                    )
                     );
 
-            ((JavascriptExecutor) driver)
-                    .executeScript(
-                            "arguments[0].click();",
-                            menu
-                    );
+            menu.click();
 
-            // -------------------------------------------------
-            // 3. Click Logout
-            // -------------------------------------------------
+        } catch (Exception e) {
+
+            captureScreenshot(
+                    "menu_click_failed"
+            );
+
+            throw new RuntimeException(
+                    "Mobile menu could not be clicked: "
+                    + e.getMessage(),
+                    e
+            );
+        }
+    }
+
+    // =========================================================
+    // CLICK LOGOUT
+    // =========================================================
+
+    private void clickLogout() {
+
+        try {
 
             WebElement logout =
                     wait.until(
-                            ExpectedConditions.elementToBeClickable(
-                                    mobileLogoutButton
-                            )
+                            ExpectedConditions
+                                    .elementToBeClickable(
+                                            logoutButton
+                                    )
                     );
 
-            ((JavascriptExecutor) driver)
-                    .executeScript(
-                            "arguments[0].click();",
-                            logout
-                    );
+            logout.click();
 
-            // -------------------------------------------------
-            // 4. Verify logout
-            // -------------------------------------------------
+        } catch (Exception e) {
+
+            captureScreenshot(
+                    "logout_click_failed"
+            );
+
+            throw new RuntimeException(
+                    "Logout button could not be clicked: "
+                    + e.getMessage(),
+                    e
+            );
+        }
+    }
+
+    // =========================================================
+    // VERIFY LOGOUT
+    // =========================================================
+
+    private void verifyLogoutSuccess() {
+
+        try {
 
             wait.until(
                     ExpectedConditions.not(
@@ -167,9 +251,43 @@ public class Logout_Page {
                     )
             );
 
+        } catch (Exception e) {
+
             captureScreenshot(
-                    "logout_success"
+                    "logout_verification_failed"
             );
+
+            throw new RuntimeException(
+                    "Logout verification failed: "
+                    + e.getMessage(),
+                    e
+            );
+        }
+    }
+
+    // =========================================================
+    // COMPLETE MOBILE LOGOUT
+    // =========================================================
+
+    public void logout_session() {
+
+        try {
+
+            // Make sure we are on dashboard
+            wait.until(
+                    ExpectedConditions.urlContains(
+                            "userDashboard"
+                    )
+            );
+
+            // Step 1: Click 3-line menu
+            clickMenu();
+
+            // Step 2: Click Logout
+            clickLogout();
+
+            // Step 3: Verify logout
+            verifyLogoutSuccess();
 
         } catch (Exception e) {
 
