@@ -15,7 +15,7 @@ public class Cancel_Appoinments extends BasePage{
 
 		public Cancel_Appoinments(WebDriver driver) {
 			super(driver);
-	        wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+	        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
 		}
 		
@@ -52,7 +52,7 @@ public class Cancel_Appoinments extends BasePage{
 		}
 		}*/
 		
-		public void cancelAllAppointments() throws InterruptedException {
+		/*public void cancelAllAppointments() throws InterruptedException {
 			while (true) {
 
 		        // Refresh appointment list
@@ -73,6 +73,31 @@ public class Cancel_Appoinments extends BasePage{
 		        // Wait until popup disappears
 		        wait.until(ExpectedConditions.invisibilityOf(cancel_appoinment));
 		    }
+		    }*/
+		public void cancelAllAppointments() throws InterruptedException {
+		    while (true) {
+
+		        // Refresh appointment list
+		        link_cancel_appointment = driver.findElements(
+		                By.xpath("//div[@class='UpcomingAppointmentSection_upcomingAppointmentCardBox__xI_7L']//div[text()='Cancel Appointment']"));
+
+		        // Stop if no appointments
+		        if (link_cancel_appointment.isEmpty()) {
+		            break;
+		        }
+
+		        // Click first Cancel Appointment
+		        wait.until(ExpectedConditions.elementToBeClickable(link_cancel_appointment.get(0))).click();
+
+		        // Confirm cancellation
+		        wait.until(ExpectedConditions.elementToBeClickable(cancel_appoinment)).click();
+
+		        // Wait until cancelled appointment is removed
+		        wait.until(ExpectedConditions.invisibilityOf(cancel_appoinment));
+
+		        // Add this
+		        Thread.sleep(500);
 		    }
+		}
 
 }

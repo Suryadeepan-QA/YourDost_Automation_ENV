@@ -17,7 +17,7 @@ public class NonLoggedin_HomePage extends BasePage{
 		super(driver);
 	}
 	
-	@FindBy(xpath="//button[text()='Login/Signup']")
+	@FindBy(xpath="//button[@class='NavigationBar_loginButton__wbY8a' and text()='Login/Signup']")
 	WebElement loginbtn;
 	//button[@class='NavigationBar_loginButton__wbY8a' and text()=\"Login/Signup\"]
 	
