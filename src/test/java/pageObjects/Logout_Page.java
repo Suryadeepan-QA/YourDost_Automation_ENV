@@ -5,18 +5,24 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementClickInterceptedException;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
 
 public class Logout_Page extends BasePage {
 
@@ -597,147 +603,220 @@ public class Logout_Page extends BasePage {
 
     public void logout_session() {
 
-        System.out.println();
-        System.out.println(
-                "================================================="
-        );
-        System.out.println(
-                "STARTING LOGOUT"
-        );
-        System.out.println(
-                "================================================="
-        );
+        System.out.println("# STARTING LOGOUT");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
         try {
 
-            wait.until(
-                    ExpectedConditions.urlContains(
-                            "/userDashboard"
-                    )
+            // =========================================================
+            // STEP 1 - WAIT FOR PROFILE BUTTON
+            // =========================================================
+
+            By profileButton = By.xpath(
+                    "//div[contains(@class,'DesktopNavBar_nameText')]"
             );
 
+            By responsiveProfile = By.xpath(
+                    "//*[contains(@class,'profile') or " +
+                    "contains(@class,'Profile') or " +
+                    "contains(@class,'user') or " +
+                    "contains(@class,'User')]"
+            );
 
-            // =================================================
-            // CHECK DESKTOP PROFILE
-            // =================================================
+            WebElement profile = null;
 
-            if (isDesktopProfilePresent()) {
+            // ---------------------------------------------------------
+            // First try desktop profile
+            // ---------------------------------------------------------
 
-                System.out.println(
-                        "Desktop profile detected."
+            try {
+
+                profile = wait.until(
+                        ExpectedConditions.elementToBeClickable(profileButton)
                 );
 
-                By profileButton =
-                        By.xpath(
-                                "//div[contains(@class,'DesktopNavBar_usernameContainer')]//button"
-                        );
+                System.out.println("Desktop Profile detected.");
 
-                WebElement user =
-                        wait.until(
-                                ExpectedConditions.elementToBeClickable(
-                                        profileButton
-                                )
-                        );
-
-                user.click();
+            } catch (Exception e) {
 
                 System.out.println(
-                        "Desktop profile clicked."
+                        "Desktop Profile not found. Trying responsive/mobile Profile."
                 );
 
+                // -----------------------------------------------------
+                // Try responsive/mobile profile
+                // -----------------------------------------------------
 
-                wait.until(
-                        ExpectedConditions.elementToBeClickable(
-                                logoutButton
-                        )
-                ).click();
-
-                System.out.println(
-                        "Logout successful."
+                profile = wait.until(
+                        ExpectedConditions.elementToBeClickable(responsiveProfile)
                 );
 
-                return;
+                System.out.println("Responsive/mobile Profile detected.");
             }
 
+            // =========================================================
+            // STEP 2 - CLICK PROFILE
+            // =========================================================
 
-            // =================================================
-            // MOBILE / RESPONSIVE PROFILE
-            // =================================================
-
-            if (isMobileProfilePresent()) {
-
-                System.out.println(
-                        "Responsive/mobile Profile detected."
-                );
-
-                /*
-                 * Click Profile first.
-                 *
-                 * The exact logout UI may appear after
-                 * opening the Profile page/menu.
-                 */
-
-                WebElement profile =
-                        wait.until(
-                                ExpectedConditions.elementToBeClickable(
-                                        mobileProfile
-                                )
-                        );
+            try {
 
                 profile.click();
 
-                System.out.println(
-                        "Mobile Profile clicked."
-                );
-
-
-                // -------------------------------------------------
-                // WAIT FOR LOGOUT
-                // -------------------------------------------------
-
-                wait.until(
-                        ExpectedConditions.elementToBeClickable(
-                                logoutButton
-                        )
-                ).click();
+            } catch (ElementClickInterceptedException e) {
 
                 System.out.println(
-                        "Logout successful."
+                        "Normal profile click intercepted. Using JavaScript click."
                 );
 
-                return;
+                ((JavascriptExecutor) driver)
+                        .executeScript("arguments[0].click();", profile);
             }
 
+            System.out.println("Profile clicked.");
 
-            // =================================================
-            // PROFILE NOT FOUND
-            // =================================================
+            // =========================================================
+            // STEP 3 - WAIT FOR LOGOUT MENU
+            // =========================================================
 
-            System.out.println(
-                    "Profile button not found."
+            /*
+             * Do NOT use:
+             *
+             * //li[normalize-space()='Logout']
+             *
+             * because Logout may be rendered inside a div, span,
+             * button, anchor, etc.
+             */
+
+            By logoutButton = By.xpath(
+                    "//*[normalize-space()='Logout']"
             );
 
-            captureScreenshot(
-                    "logout_profile_not_found"
-            );
+            WebElement logout = null;
 
+            try {
+
+                logout = wait.until(
+                        ExpectedConditions.elementToBeClickable(logoutButton)
+                );
+
+                System.out.println("Logout option detected.");
+
+            } catch (TimeoutException e) {
+
+                System.out.println(
+                        "Exact Logout text was not found. Trying flexible locator."
+                );
+
+                /*
+                 * Some applications contain whitespace or additional
+                 * text around Logout.
+                 */
+
+                By flexibleLogout = By.xpath(
+                        "//*[contains(normalize-space(.),'Logout')]"
+                );
+
+                logout = wait.until(
+                        ExpectedConditions.elementToBeClickable(flexibleLogout)
+                );
+
+                System.out.println("Flexible Logout option detected.");
+            }
+
+            // =========================================================
+            // STEP 4 - CLICK LOGOUT
+            // =========================================================
+
+            try {
+
+                logout.click();
+
+            } catch (ElementClickInterceptedException e) {
+
+                System.out.println(
+                        "Normal Logout click intercepted. Using JavaScript."
+                );
+
+                ((JavascriptExecutor) driver)
+                        .executeScript("arguments[0].click();", logout);
+            }
+
+            System.out.println("Logout clicked.");
+
+            // =========================================================
+            // STEP 5 - WAIT FOR LOGOUT TO COMPLETE
+            // =========================================================
+
+            wait.until(ExpectedConditions.or(
+
+                    ExpectedConditions.urlContains("/"),
+
+                    ExpectedConditions.urlContains("login"),
+
+                    ExpectedConditions.urlContains("home")
+
+            ));
+
+            System.out.println("Logout completed successfully.");
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "Logout failed: "
-                            + e.getMessage()
-            );
+            System.out.println("Logout failed: " + e.getMessage());
 
-            captureScreenshot(
-                    "logout_failed"
-            );
+            // =========================================================
+            // SCREENSHOT
+            // =========================================================
+
+            try {
+
+                String timestamp =
+                        new SimpleDateFormat("yyyyMMdd_HHmmss")
+                                .format(new Date());
+
+                String screenshotDir =
+                        "target/screenshots/login";
+
+                File directory =
+                        new File(screenshotDir);
+
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+
+                String screenshotPath =
+                        screenshotDir
+                                + "/logout_failed_"
+                                + timestamp
+                                + ".png";
+
+                File screenshotFile =
+                        ((TakesScreenshot) driver)
+                                .getScreenshotAs(OutputType.FILE);
+
+                Files.copy(
+                        screenshotFile.toPath(),
+                        Paths.get(screenshotPath),
+                        StandardCopyOption.REPLACE_EXISTING
+                );
+
+                System.out.println(
+                        "Screenshot saved: " + screenshotPath
+                );
+
+            } catch (Exception screenshotException) {
+
+                System.out.println(
+                        "Unable to capture logout screenshot: "
+                                + screenshotException.getMessage()
+                );
+            }
 
             throw new RuntimeException(
-                    "Logout failed: "
-                            + e.getMessage(),
+                    "Logout failed: " + e.getMessage(),
                     e
             );
         }
     }
+    
 }
