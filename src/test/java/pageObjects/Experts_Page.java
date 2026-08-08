@@ -1,5 +1,7 @@
 package pageObjects;
 
+import java.time.Duration;
+
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -12,6 +14,8 @@ public class Experts_Page extends BasePage{
 
 	public Experts_Page(WebDriver driver) {
 		super(driver);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+
 	}
 	
 	//@FindBy(xpath="//input[@placeholder='Search Expert by Name' or @id=\"mat-input-0\"]")
