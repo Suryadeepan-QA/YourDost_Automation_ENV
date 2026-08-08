@@ -17,6 +17,7 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -43,7 +44,12 @@ public class BaseClass {
 		switch(br.toLowerCase())
 		{
 		case "chrome":driver=new ChromeDriver();break;
-		case "edge": driver=new EdgeDriver();break;
+		case "edge": 
+			    EdgeOptions options = new EdgeOptions();
+		        options.addArguments("--window-size=1920,1080");
+		        options.addArguments("--start-maximized");
+		        driver = new EdgeDriver(options);
+			break;
 		case "firefox":driver=new FirefoxDriver();break;
 		default:System.out.println("Invalid browser");return;
 		
