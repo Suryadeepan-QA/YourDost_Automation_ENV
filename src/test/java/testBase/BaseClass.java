@@ -12,14 +12,17 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
@@ -41,13 +44,16 @@ public class BaseClass {
     // =========================================================
 
     @BeforeClass
-    @Parameters({"os", "browser"})
+    @Parameters({ "os", "browser" })
     public void setup(String os, String br) throws IOException {
 
-        FileReader file =
-                new FileReader(
-                        "./src//test//resources//config.properties"
-                );
+        // ---------------------------------------------------------
+        // Load config.properties
+        // ---------------------------------------------------------
+
+        FileReader file = new FileReader(
+                "./src/test/resources/config.properties"
+        );
 
         p = new Properties();
 
@@ -55,78 +61,172 @@ public class BaseClass {
 
         file.close();
 
-        logger =
-                LogManager.getLogger(
-                        this.getClass()
-                );
+        // ---------------------------------------------------------
+        // Logger
+        // ---------------------------------------------------------
+
+        logger = LogManager.getLogger(
+                this.getClass()
+        );
+
+        // ---------------------------------------------------------
+        // Browser
+        // ---------------------------------------------------------
 
         switch (br.toLowerCase()) {
 
-            case "chrome":
+        // =========================================================
+        // CHROME
+        // =========================================================
 
-                driver = new ChromeDriver();
+        case "chrome":
 
-                break;
+            ChromeOptions chromeOptions =
+                    new ChromeOptions();
 
-            case "edge":
+            // Force desktop viewport
+            chromeOptions.addArguments(
+                    "--window-size=1920,1080"
+            );
 
-                EdgeOptions options =
-                        new EdgeOptions();
+            chromeOptions.addArguments(
+                    "--start-maximized"
+            );
 
-                options.addArguments(
-                        "--window-size=1920,1080"
-                );
+            driver =
+                    new ChromeDriver(chromeOptions);
 
-                options.addArguments(
-                        "--start-maximized"
-                );
+            break;
 
-                driver =
-                        new EdgeDriver(options);
+        // =========================================================
+        // EDGE
+        // =========================================================
 
-                break;
+        case "edge":
 
-            case "firefox":
+            EdgeOptions edgeOptions =
+                    new EdgeOptions();
 
-                driver =
-                        new FirefoxDriver();
+            // -----------------------------------------------------
+            // Force desktop viewport
+            // -----------------------------------------------------
 
-                break;
+            edgeOptions.addArguments(
+                    "--window-size=1920,1080"
+            );
 
-            default:
+            edgeOptions.addArguments(
+                    "--start-maximized"
+            );
 
-                System.out.println(
-                        "Invalid browser: " + br
-                );
+            driver =
+                    new EdgeDriver(edgeOptions);
 
-                return;
+            break;
+
+        // =========================================================
+        // FIREFOX
+        // =========================================================
+
+        case "firefox":
+
+            driver =
+                    new FirefoxDriver();
+
+            break;
+
+        // =========================================================
+        // INVALID BROWSER
+        // =========================================================
+
+        default:
+
+            throw new IllegalArgumentException(
+                    "Invalid browser: " + br
+            );
         }
 
-        /*
-         * Delete existing cookies before starting.
-         */
+        // =========================================================
+        // DELETE COOKIES
+        // =========================================================
+
         driver.manage().deleteAllCookies();
 
-        /*
-         * Use a fixed size so local and GitHub Actions
-         * behave more consistently.
-         */
+        // =========================================================
+        // FORCE DESKTOP WINDOW SIZE
+        // =========================================================
+
         driver.manage().window().setSize(
                 new Dimension(1920, 1080)
         );
 
-        /*
-         * Implicit wait.
-         */
-        driver.manage().timeouts().implicitlyWait(
-                Duration.ofSeconds(10)
+        // =========================================================
+        // PRINT BROWSER SIZE
+        // =========================================================
+
+        System.out.println(
+                "=========================================="
         );
 
-        /*
-         * Open application.
-         */
+        System.out.println(
+                "Browser: " + br
+        );
+
+        System.out.println(
+                "Window Width: "
+                + driver.manage()
+                        .window()
+                        .getSize()
+                        .getWidth()
+        );
+
+        System.out.println(
+                "Window Height: "
+                + driver.manage()
+                        .window()
+                        .getSize()
+                        .getHeight()
+        );
+
+        System.out.println(
+                "=========================================="
+        );
+
+        // =========================================================
+        // IMPLICIT WAIT
+        // =========================================================
+
+        driver.manage().timeouts().implicitlyWait(
+                Duration.ofSeconds(5)
+        );
+
+        // =========================================================
+        // PAGE LOAD TIMEOUT
+        // =========================================================
+
+        driver.manage().timeouts().pageLoadTimeout(
+                Duration.ofSeconds(300)
+        );
+
+        // =========================================================
+        // SCRIPT TIMEOUT
+        // =========================================================
+
+        driver.manage().timeouts().scriptTimeout(
+                Duration.ofSeconds(30)
+        );
+
+        // =========================================================
+        // OPEN APPLICATION
+        // =========================================================
+
         driver.get(
                 p.getProperty("url")
+        );
+
+        System.out.println(
+                "Application opened: "
+                + driver.getCurrentUrl()
         );
     }
 
@@ -156,7 +256,7 @@ public class BaseClass {
 
             System.out.println(
                     "Error while closing browser: "
-                            + e.getMessage()
+                    + e.getMessage()
             );
         }
     }
@@ -167,10 +267,7 @@ public class BaseClass {
 
     public String randomstring() {
 
-        String generatedstring =
-                RandomStringUtils.randomAlphabetic(5);
-
-        return generatedstring;
+        return RandomStringUtils.randomAlphabetic(5);
     }
 
     // =========================================================
@@ -179,10 +276,7 @@ public class BaseClass {
 
     public String randomnumber() {
 
-        String generatednumber =
-                RandomStringUtils.randomNumeric(5);
-
-        return generatednumber;
+        return RandomStringUtils.randomNumeric(5);
     }
 
     // =========================================================
@@ -192,10 +286,22 @@ public class BaseClass {
     public void login()
             throws InterruptedException, IOException {
 
+        System.out.println(
+                "\n# STARTING LOGIN"
+        );
+
+        // ---------------------------------------------------------
+        // Home Page
+        // ---------------------------------------------------------
+
         NonLoggedin_HomePage hp =
                 new NonLoggedin_HomePage(driver);
 
         hp.clickloginbtn();
+
+        // ---------------------------------------------------------
+        // Login Popup
+        // ---------------------------------------------------------
 
         Login_Popup lp =
                 new Login_Popup(driver);
@@ -213,6 +319,10 @@ public class BaseClass {
         Thread.sleep(1000);
 
         lp.clickloginbtn();
+
+        System.out.println(
+                "# LOGIN BUTTON CLICKED"
+        );
     }
 
     // =========================================================
@@ -246,12 +356,13 @@ public class BaseClass {
             /*
              * Logout is cleanup.
              *
-             * Do not allow a cleanup problem to hide
-             * the actual test result.
+             * Do not allow logout cleanup failure
+             * to hide the actual test result.
              */
+
             System.out.println(
                     "Logout cleanup failed: "
-                            + e.getMessage()
+                    + e.getMessage()
             );
         }
     }
@@ -266,7 +377,7 @@ public class BaseClass {
 
         String timeStamp =
                 new SimpleDateFormat(
-                        "yyyyMMddHHmmss"
+                        "yyyyMMdd_HHmmss"
                 ).format(new Date());
 
         TakesScreenshot ts =
@@ -277,13 +388,32 @@ public class BaseClass {
                         OutputType.FILE
                 );
 
-        String targetFilePath =
+        // ---------------------------------------------------------
+        // Store screenshots inside target/screenshots
+        // ---------------------------------------------------------
+
+        String targetDirectory =
                 System.getProperty("user.dir")
-                        + "\\screenshots\\"
-                        + tname
-                        + "_"
-                        + timeStamp
-                        + ".png";
+                + File.separator
+                + "target"
+                + File.separator
+                + "screenshots";
+
+        File directory =
+                new File(targetDirectory);
+
+        if (!directory.exists()) {
+
+            directory.mkdirs();
+        }
+
+        String targetFilePath =
+                targetDirectory
+                + File.separator
+                + tname
+                + "_"
+                + timeStamp
+                + ".png";
 
         File targetFile =
                 new File(targetFilePath);
@@ -291,6 +421,11 @@ public class BaseClass {
         FileUtils.copyFile(
                 sourceFile,
                 targetFile
+        );
+
+        System.out.println(
+                "Screenshot saved: "
+                + targetFilePath
         );
 
         return targetFilePath;

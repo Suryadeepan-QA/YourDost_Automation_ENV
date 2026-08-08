@@ -3,7 +3,6 @@ package pageObjects;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
@@ -17,12 +16,14 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Logout_Page {
 
     private WebDriver driver;
+
     private WebDriverWait wait;
 
     // =========================================================
@@ -33,10 +34,11 @@ public class Logout_Page {
 
         this.driver = driver;
 
-        this.wait = new WebDriverWait(
-                driver,
-                Duration.ofSeconds(20)
-        );
+        this.wait =
+                new WebDriverWait(
+                        driver,
+                        Duration.ofSeconds(30)
+                );
     }
 
     // =========================================================
@@ -47,58 +49,6 @@ public class Logout_Page {
             "https://staging-app.yourdost.com/userDashboard/home";
 
     // =========================================================
-    // PROFILE LOCATORS
-    // =========================================================
-
-    /*
-     * IMPORTANT:
-     *
-     * Replace the first locator below with the ACTUAL locator
-     * of your Profile/User icon if available.
-     *
-     * Do not keep adding random generic XPath.
-     */
-
-    private final By profileButton = By.xpath(
-            "//*[contains(@class,'profile') " +
-            "or contains(@class,'Profile') " +
-            "or contains(@class,'user') " +
-            "or contains(@class,'User')]"
-    );
-
-    // =========================================================
-    // LOGOUT LOCATORS
-    // =========================================================
-
-    /*
-     * We don't assume Logout is necessarily inside <li>.
-     *
-     * Your previous locator was:
-     *
-     * //li[normalize-space()='Logout']
-     *
-     * That can fail if Logout is a div, button, a, etc.
-     */
-
-    private final By logoutButton = By.xpath(
-            "//*[normalize-space()='Logout']"
-    );
-
-    // =========================================================
-    // DASHBOARD ELEMENTS
-    // =========================================================
-
-    /*
-     * Add elements that are definitely present on the
-     * dashboard after login.
-     *
-     * These are only examples. Replace them with an actual
-     * dashboard element from your application.
-     */
-
-    private final By dashboardBody = By.tagName("body");
-
-    // =========================================================
     // SCREENSHOT DIRECTORY
     // =========================================================
 
@@ -107,9 +57,11 @@ public class Logout_Page {
         String directory =
                 "target/screenshots/login";
 
-        File file = new File(directory);
+        File file =
+                new File(directory);
 
         if (!file.exists()) {
+
             file.mkdirs();
         }
 
@@ -117,7 +69,7 @@ public class Logout_Page {
     }
 
     // =========================================================
-    // SCREENSHOT METHOD
+    // SCREENSHOT
     // =========================================================
 
     private void captureScreenshot(String name) {
@@ -169,18 +121,22 @@ public class Logout_Page {
     }
 
     // =========================================================
-    // WAIT FOR PAGE
+    // WAIT FOR PAGE LOAD
     // =========================================================
 
     private void waitForPageToLoad() {
 
         wait.until(
-                webDriver ->
-                        ((JavascriptExecutor) webDriver)
-                                .executeScript(
-                                        "return document.readyState"
-                                )
-                                .equals("complete")
+                webDriver -> {
+
+                    Object state =
+                            ((JavascriptExecutor) webDriver)
+                                    .executeScript(
+                                            "return document.readyState"
+                                    );
+
+                    return "complete".equals(state);
+                }
         );
     }
 
@@ -197,7 +153,7 @@ public class Logout_Page {
         try {
 
             // -------------------------------------------------
-            // 1. Wait for page loading
+            // 1. Wait for page
             // -------------------------------------------------
 
             waitForPageToLoad();
@@ -211,13 +167,17 @@ public class Logout_Page {
                     + driver.getCurrentUrl()
             );
 
+            // -------------------------------------------------
+            // 3. Print title
+            // -------------------------------------------------
+
             System.out.println(
                     "Current Title: "
                     + driver.getTitle()
             );
 
             // -------------------------------------------------
-            // 3. Verify dashboard URL
+            // 4. Wait for dashboard URL
             // -------------------------------------------------
 
             wait.until(
@@ -231,21 +191,48 @@ public class Logout_Page {
             );
 
             // -------------------------------------------------
-            // 4. Wait for body
+            // 5. Make sure desktop resolution is used
             // -------------------------------------------------
 
-            wait.until(
-                    ExpectedConditions.visibilityOfElementLocated(
-                            dashboardBody
-                    )
+            driver.manage()
+                    .window()
+                    .setSize(
+                            new org.openqa.selenium.Dimension(
+                                    1920,
+                                    1080
+                            )
+                    );
+
+            System.out.println(
+                    "Desktop resolution set: "
+                    + driver.manage()
+                            .window()
+                            .getSize()
             );
 
             // -------------------------------------------------
-            // 5. Wait for Profile/User icon
+            // 6. Wait for body
+            // -------------------------------------------------
+
+            wait.until(
+                    ExpectedConditions
+                            .presenceOfElementLocated(
+                                    By.tagName("body")
+                            )
+            );
+
+            // -------------------------------------------------
+            // 7. Wait for dashboard rendering
+            // -------------------------------------------------
+
+            waitForDashboardRendering();
+
+            // -------------------------------------------------
+            // 8. Try Profile
             // -------------------------------------------------
 
             WebElement profile =
-                    waitForProfileButton();
+                    findProfileButton();
 
             if (profile != null) {
 
@@ -254,7 +241,7 @@ public class Logout_Page {
                 );
 
                 System.out.println(
-                        "Profile navigation found."
+                        "Desktop Profile navigation found."
                 );
 
                 return;
@@ -263,6 +250,12 @@ public class Logout_Page {
             // -------------------------------------------------
             // Profile not found
             // -------------------------------------------------
+
+            System.out.println(
+                    "Profile button was not found."
+            );
+
+            printDashboardDiagnostics();
 
             captureScreenshot(
                     "login_verification_failed"
@@ -307,41 +300,189 @@ public class Logout_Page {
     }
 
     // =========================================================
-    // WAIT FOR PROFILE
+    // WAIT FOR DASHBOARD RENDERING
     // =========================================================
 
-    private WebElement waitForProfileButton() {
+    private void waitForDashboardRendering() {
 
         System.out.println(
-                "Waiting for Profile/User icon..."
+                "Waiting for dashboard UI..."
         );
 
-        try {
+        wait.until(
+                webDriver -> {
 
-            WebElement profile =
-                    new WebDriverWait(
-                            driver,
-                            Duration.ofSeconds(20)
-                    ).until(
-                            ExpectedConditions.visibilityOfElementLocated(
-                                    profileButton
-                            )
-                    );
+                    try {
 
-            System.out.println(
-                    "Profile/User icon is visible."
-            );
+                        String readyState =
+                                (String)
+                                ((JavascriptExecutor) webDriver)
+                                        .executeScript(
+                                                "return document.readyState"
+                                        );
 
-            return profile;
+                        if (!"complete".equals(
+                                readyState)) {
 
-        } catch (Exception e) {
+                            return false;
+                        }
 
-            System.out.println(
-                    "Profile/User icon was not found."
-            );
+                        String bodyText =
+                                webDriver
+                                        .findElement(
+                                                By.tagName("body")
+                                        )
+                                        .getText();
 
-            return null;
+                        return bodyText != null
+                                && bodyText.trim().length() > 0;
+
+                    } catch (Exception e) {
+
+                        return false;
+                    }
+                }
+        );
+
+        System.out.println(
+                "Dashboard UI rendered."
+        );
+    }
+
+    // =========================================================
+    // FIND PROFILE BUTTON
+    // =========================================================
+
+    private WebElement findProfileButton() {
+
+        System.out.println(
+                "Waiting for desktop Profile/User icon..."
+        );
+
+        /*
+         * IMPORTANT:
+         *
+         * These are candidate locators.
+         *
+         * The best solution is still to replace the
+         * correct candidate with the actual DOM locator
+         * after inspecting the Profile icon.
+         */
+
+        By[] profileLocators = {
+
+            // aria-label
+            By.xpath(
+                    "//*[@aria-label='Profile']"
+            ),
+
+            By.xpath(
+                    "//*[@aria-label='User']"
+            ),
+
+            By.xpath(
+                    "//*[@aria-label='Account']"
+            ),
+
+            // title
+            By.xpath(
+                    "//*[@title='Profile']"
+            ),
+
+            By.xpath(
+                    "//*[@title='User']"
+            ),
+
+            By.xpath(
+                    "//*[@title='Account']"
+            ),
+
+            // image alt
+            By.xpath(
+                    "//img[contains(" +
+                    "translate(@alt," +
+                    "'ABCDEFGHIJKLMNOPQRSTUVWXYZ'," +
+                    "'abcdefghijklmnopqrstuvwxyz')," +
+                    "'profile')]"
+            ),
+
+            By.xpath(
+                    "//img[contains(" +
+                    "translate(@alt," +
+                    "'ABCDEFGHIJKLMNOPQRSTUVWXYZ'," +
+                    "'abcdefghijklmnopqrstuvwxyz')," +
+                    "'user')]"
+            ),
+
+            // buttons containing profile/user/account text
+            By.xpath(
+                    "//button[contains(" +
+                    "translate(.," +
+                    "'ABCDEFGHIJKLMNOPQRSTUVWXYZ'," +
+                    "'abcdefghijklmnopqrstuvwxyz')," +
+                    "'profile')]"
+            ),
+
+            By.xpath(
+                    "//button[contains(" +
+                    "translate(.," +
+                    "'ABCDEFGHIJKLMNOPQRSTUVWXYZ'," +
+                    "'abcdefghijklmnopqrstuvwxyz')," +
+                    "'account')]"
+            ),
+
+            // links containing profile/account
+            By.xpath(
+                    "//a[contains(" +
+                    "translate(.," +
+                    "'ABCDEFGHIJKLMNOPQRSTUVWXYZ'," +
+                    "'abcdefghijklmnopqrstuvwxyz')," +
+                    "'profile')]"
+            ),
+
+            By.xpath(
+                    "//a[contains(" +
+                    "translate(.," +
+                    "'ABCDEFGHIJKLMNOPQRSTUVWXYZ'," +
+                    "'abcdefghijklmnopqrstuvwxyz')," +
+                    "'account')]"
+            )
+        };
+
+        // =====================================================
+        // TRY EACH LOCATOR
+        // =====================================================
+
+        for (By locator : profileLocators) {
+
+            try {
+
+                List<WebElement> elements =
+                        driver.findElements(locator);
+
+                for (WebElement element : elements) {
+
+                    if (element.isDisplayed()
+                            && element.isEnabled()) {
+
+                        System.out.println(
+                                "Profile candidate found: "
+                                + locator
+                        );
+
+                        return element;
+                    }
+                }
+
+            } catch (Exception ignored) {
+            }
         }
+
+        System.out.println(
+                "No Profile candidate was found."
+        );
+
+        return null;
     }
 
     // =========================================================
@@ -351,18 +492,27 @@ public class Logout_Page {
     private void clickProfile() {
 
         System.out.println(
-                "Waiting for Profile navigation..."
+                "Waiting for desktop Profile..."
         );
 
         WebElement profile =
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                profileButton
-                        )
-                );
+                findProfileButton();
+
+        if (profile == null) {
+
+            printDashboardDiagnostics();
+
+            captureScreenshot(
+                    "profile_not_found"
+            );
+
+            throw new RuntimeException(
+                    "Desktop Profile button was not found."
+            );
+        }
 
         // -----------------------------------------------------
-        // Scroll profile into view
+        // Scroll into view
         // -----------------------------------------------------
 
         ((JavascriptExecutor) driver)
@@ -373,14 +523,18 @@ public class Logout_Page {
                 );
 
         // -----------------------------------------------------
-        // Wait until clickable
+        // Wait for clickable
         // -----------------------------------------------------
 
-        wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        profileButton
-                )
-        );
+        try {
+
+            wait.until(
+                    ExpectedConditions
+                            .elementToBeClickable(profile)
+            );
+
+        } catch (Exception ignored) {
+        }
 
         // -----------------------------------------------------
         // Click
@@ -393,8 +547,11 @@ public class Logout_Page {
         } catch (Exception e) {
 
             System.out.println(
-                    "Normal click failed. "
-                    + "Trying JavaScript click."
+                    "Normal Profile click failed."
+            );
+
+            System.out.println(
+                    "Trying JavaScript click..."
             );
 
             ((JavascriptExecutor) driver)
@@ -405,12 +562,8 @@ public class Logout_Page {
         }
 
         System.out.println(
-                "Profile clicked."
+                "Desktop Profile clicked."
         );
-
-        // -----------------------------------------------------
-        // Screenshot after profile click
-        // -----------------------------------------------------
 
         captureScreenshot(
                 "profile_clicked"
@@ -430,13 +583,13 @@ public class Logout_Page {
         try {
 
             WebElement logout =
-                    new WebDriverWait(
-                            driver,
-                            Duration.ofSeconds(15)
-                    ).until(
-                            ExpectedConditions.visibilityOfElementLocated(
-                                    logoutButton
-                            )
+                    wait.until(
+                            ExpectedConditions
+                                    .visibilityOfElementLocated(
+                                            By.xpath(
+                                                    "//*[normalize-space()='Logout']"
+                                            )
+                                    )
                     );
 
             System.out.println(
@@ -447,62 +600,11 @@ public class Logout_Page {
 
         } catch (Exception e) {
 
-            // -------------------------------------------------
-            // Diagnostic information
-            // -------------------------------------------------
-
             System.out.println(
-                    "\n# LOGOUT ELEMENT DIAGNOSTICS"
+                    "Logout option was not found."
             );
 
-            System.out.println(
-                    "Current URL: "
-                    + driver.getCurrentUrl()
-            );
-
-            System.out.println(
-                    "Current Title: "
-                    + driver.getTitle()
-            );
-
-            List<WebElement> logoutElements =
-                    driver.findElements(
-                            By.xpath(
-                                    "//*[normalize-space()='Logout']"
-                            )
-                    );
-
-            System.out.println(
-                    "Logout elements found: "
-                    + logoutElements.size()
-            );
-
-            for (WebElement element :
-                    logoutElements) {
-
-                try {
-
-                    System.out.println(
-                            "Logout text: ["
-                            + element.getText()
-                            + "]"
-                    );
-
-                    System.out.println(
-                            "Logout tag: "
-                            + element.getTagName()
-                    );
-
-                    System.out.println(
-                            "Logout class: "
-                            + element.getAttribute(
-                                    "class"
-                            )
-                    );
-
-                } catch (Exception ignored) {
-                }
-            }
+            printLogoutDiagnostics();
 
             captureScreenshot(
                     "logout_option_not_found"
@@ -530,7 +632,7 @@ public class Logout_Page {
         }
 
         // -----------------------------------------------------
-        // Scroll Logout into view
+        // Scroll
         // -----------------------------------------------------
 
         ((JavascriptExecutor) driver)
@@ -541,28 +643,26 @@ public class Logout_Page {
                 );
 
         // -----------------------------------------------------
-        // Wait until clickable
-        // -----------------------------------------------------
-
-        wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        logoutButton
-                )
-        );
-
-        // -----------------------------------------------------
-        // Click Logout
+        // Click
         // -----------------------------------------------------
 
         try {
+
+            wait.until(
+                    ExpectedConditions
+                            .elementToBeClickable(logout)
+            );
 
             logout.click();
 
         } catch (Exception e) {
 
             System.out.println(
-                    "Normal Logout click failed. "
-                    + "Trying JavaScript click."
+                    "Normal Logout click failed."
+            );
+
+            System.out.println(
+                    "Trying JavaScript click..."
             );
 
             ((JavascriptExecutor) driver)
@@ -574,6 +674,10 @@ public class Logout_Page {
 
         System.out.println(
                 "Logout clicked."
+        );
+
+        captureScreenshot(
+                "logout_clicked"
         );
     }
 
@@ -589,10 +693,7 @@ public class Logout_Page {
 
         try {
 
-            new WebDriverWait(
-                    driver,
-                    Duration.ofSeconds(20)
-            ).until(
+            wait.until(
                     ExpectedConditions.not(
                             ExpectedConditions.urlContains(
                                     "userDashboard"
@@ -602,6 +703,11 @@ public class Logout_Page {
 
             System.out.println(
                     "\n# LOGOUT VERIFICATION SUCCESSFUL"
+            );
+
+            System.out.println(
+                    "Current URL: "
+                    + driver.getCurrentUrl()
             );
 
         } catch (Exception e) {
@@ -645,7 +751,7 @@ public class Logout_Page {
         try {
 
             // -------------------------------------------------
-            // 1. Make sure we are on dashboard
+            // 1. Dashboard
             // -------------------------------------------------
 
             wait.until(
@@ -659,35 +765,36 @@ public class Logout_Page {
             );
 
             // -------------------------------------------------
-            // 2. Wait for Profile
+            // 2. Force desktop
             // -------------------------------------------------
 
-            WebElement profile =
-                    waitForProfileButton();
-
-            if (profile == null) {
-
-                throw new RuntimeException(
-                        "Profile button was not found "
-                        + "during logout."
-                );
-            }
+            driver.manage()
+                    .window()
+                    .setSize(
+                            new org.openqa.selenium.Dimension(
+                                    1920,
+                                    1080
+                            )
+                    );
 
             System.out.println(
-                    "Profile navigation found."
+                    "Desktop browser size: "
+                    + driver.manage()
+                            .window()
+                            .getSize()
             );
 
             // -------------------------------------------------
-            // 3. Click Profile
+            // 3. Wait dashboard
+            // -------------------------------------------------
+
+            waitForDashboardRendering();
+
+            // -------------------------------------------------
+            // 4. Click Profile
             // -------------------------------------------------
 
             clickProfile();
-
-            // -------------------------------------------------
-            // 4. Wait for Logout
-            // -------------------------------------------------
-
-            waitForLogoutButton();
 
             // -------------------------------------------------
             // 5. Click Logout
@@ -731,6 +838,165 @@ public class Logout_Page {
                     + e.getMessage(),
                     e
             );
+        }
+    }
+
+    // =========================================================
+    // PROFILE / DASHBOARD DIAGNOSTICS
+    // =========================================================
+
+    private void printDashboardDiagnostics() {
+
+        System.out.println(
+                "\n# PROFILE DIAGNOSTICS"
+        );
+
+        System.out.println(
+                "Current URL: "
+                + driver.getCurrentUrl()
+        );
+
+        System.out.println(
+                "Current Title: "
+                + driver.getTitle()
+        );
+
+        System.out.println(
+                "Browser size: "
+                + driver.manage()
+                        .window()
+                        .getSize()
+        );
+
+        // -----------------------------------------------------
+        // Buttons
+        // -----------------------------------------------------
+
+        List<WebElement> buttons =
+                driver.findElements(
+                        By.tagName("button")
+                );
+
+        System.out.println(
+                "Buttons found: "
+                + buttons.size()
+        );
+
+        int buttonCount = 0;
+
+        for (WebElement button : buttons) {
+
+            try {
+
+                if (!button.isDisplayed()) {
+                    continue;
+                }
+
+                String text =
+                        button.getText();
+
+                String aria =
+                        button.getAttribute(
+                                "aria-label"
+                        );
+
+                String title =
+                        button.getAttribute(
+                                "title"
+                        );
+
+                String className =
+                        button.getAttribute(
+                                "class"
+                        );
+
+                System.out.println(
+                        "BUTTON ["
+                        + buttonCount
+                        + "]"
+                );
+
+                System.out.println(
+                        " text = [" + text + "]"
+                );
+
+                System.out.println(
+                        " aria-label = [" + aria + "]"
+                );
+
+                System.out.println(
+                        " title = [" + title + "]"
+                );
+
+                System.out.println(
+                        " class = [" + className + "]"
+                );
+
+                buttonCount++;
+
+                // Avoid huge GitHub Actions logs
+                if (buttonCount >= 30) {
+                    break;
+                }
+
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    // =========================================================
+    // LOGOUT DIAGNOSTICS
+    // =========================================================
+
+    private void printLogoutDiagnostics() {
+
+        System.out.println(
+                "\n# LOGOUT ELEMENT DIAGNOSTICS"
+        );
+
+        List<WebElement> elements =
+                driver.findElements(
+                        By.xpath(
+                                "//*[normalize-space()='Logout']"
+                        )
+                );
+
+        System.out.println(
+                "Logout elements found: "
+                + elements.size()
+        );
+
+        for (WebElement element : elements) {
+
+            try {
+
+                System.out.println(
+                        "Logout text: ["
+                        + element.getText()
+                        + "]"
+                );
+
+                System.out.println(
+                        "Logout tag: "
+                        + element.getTagName()
+                );
+
+                System.out.println(
+                        "Logout class: "
+                        + element.getAttribute(
+                                "class"
+                        )
+                );
+
+                System.out.println(
+                        "Logout aria-label: "
+                        + element.getAttribute(
+                                "aria-label"
+                        )
+                );
+
+            } catch (Exception ignored) {
+            }
         }
     }
 }
