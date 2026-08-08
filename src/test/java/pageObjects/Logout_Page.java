@@ -1,25 +1,77 @@
 package pageObjects;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Logout_Page extends BasePage {
 
     private WebDriverWait wait;
+
+    // =========================================================
+    // LOCATORS
+    // =========================================================
+
+    /*
+     * Profile button
+     *
+     * HTML:
+     *
+     * <div class="DesktopNavBar_usernameContainer__35kIp">
+     *     <button ... aria-haspopup="true">
+     *         <div class="MuiAvatar-root ...">S</div>
+     *     </button>
+     *     <div class="DesktopNavBar_nameText__hAqgn">
+     *         surya99
+     *     </div>
+     * </div>
+     *
+     * We intentionally use only the stable part of the CSS class.
+     */
+    @FindBy(xpath =
+            "//div[contains(@class,'DesktopNavBar_usernameContainer')]//button")
+    private WebElement usericon;
+
+
+    /*
+     * Username
+     *
+     * Example:
+     * <div class="DesktopNavBar_nameText__hAqgn">
+     *     surya99
+     * </div>
+     */
+    @FindBy(xpath =
+            "//div[contains(@class,'DesktopNavBar_nameText')]")
+    private WebElement username;
+
+
+    /*
+     * Logout button
+     */
+    @FindBy(xpath =
+            "//li[normalize-space()='Logout']")
+    private WebElement btn_logout;
+
+
+    // =========================================================
+    // CONSTRUCTOR
+    // =========================================================
 
     public Logout_Page(WebDriver driver) {
 
@@ -33,256 +85,122 @@ public class Logout_Page extends BasePage {
 
 
     // =========================================================
-    // LOCATORS
+    // SCREENSHOT DIRECTORY
     // =========================================================
 
-    private final By profileButton = By.xpath(
-            "//div[contains(@class,'DesktopNavBar_usernameContainer')]//button"
-    );
+    private String getScreenshotDirectory() {
 
-    private final By usernameElement = By.xpath(
-            "//div[contains(@class,'DesktopNavBar_nameText')]"
-    );
+        String screenshotDir = "target/screenshots/login";
 
-    private final By logoutButton = By.xpath(
-            "//li[normalize-space()='Logout']"
-    );
+        File directory = new File(screenshotDir);
+
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        return screenshotDir;
+    }
 
 
     // =========================================================
-    // VERIFY LOGIN
+    // TAKE SCREENSHOT
     // =========================================================
 
-    public void verifyLoginSuccess() {
+    private String captureScreenshot(String screenshotName) {
+
+        String screenshotDir = getScreenshotDirectory();
+
+        String timestamp =
+                LocalDateTime.now().format(
+                        DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
+                );
+
+        String screenshotPath =
+                screenshotDir
+                        + "/"
+                        + screenshotName
+                        + "_"
+                        + timestamp
+                        + ".png";
+
+        try {
+
+            File screenshotFile =
+                    ((TakesScreenshot) driver)
+                            .getScreenshotAs(OutputType.FILE);
+
+            Files.copy(
+                    screenshotFile.toPath(),
+                    Paths.get(screenshotPath),
+                    StandardCopyOption.REPLACE_EXISTING
+            );
+
+            System.out.println(
+                    "Screenshot saved: " + screenshotPath
+            );
+
+            return screenshotPath;
+
+        } catch (IOException e) {
+
+            System.out.println(
+                    "Unable to save screenshot: "
+                            + e.getMessage()
+            );
+
+            return null;
+        }
+    }
+
+
+    // =========================================================
+    // PAGE SOURCE DIAGNOSTIC
+    // =========================================================
+
+    private void printPageDiagnostics() {
 
         System.out.println();
         System.out.println("=================================================");
-        System.out.println("STARTING LOGIN VERIFICATION");
+        System.out.println("PAGE DIAGNOSTICS");
         System.out.println("=================================================");
 
         try {
 
-            // -------------------------------------------------
-            // 1. CURRENT URL
-            // -------------------------------------------------
+            String currentUrl = driver.getCurrentUrl();
+
+            String currentTitle = driver.getTitle();
 
             System.out.println(
-                    "Current URL: "
-                            + driver.getCurrentUrl()
-            );
-
-
-            // -------------------------------------------------
-            // 2. CURRENT TITLE
-            // -------------------------------------------------
-
-            System.out.println(
-                    "Current Title: "
-                            + driver.getTitle()
-            );
-
-
-            // -------------------------------------------------
-            // 3. WAIT FOR DASHBOARD URL
-            // -------------------------------------------------
-
-            System.out.println(
-                    "Waiting for dashboard URL..."
-            );
-
-            wait.until(
-                    ExpectedConditions.urlContains(
-                            "/userDashboard"
-                    )
+                    "Current URL: " + currentUrl
             );
 
             System.out.println(
-                    "Dashboard URL detected."
+                    "Current Title: " + currentTitle
             );
 
 
             // -------------------------------------------------
-            // 4. WAIT FOR BODY
+            // PAGE SOURCE
             // -------------------------------------------------
 
-            System.out.println(
-                    "Waiting for body..."
-            );
+            String pageSource = driver.getPageSource();
 
-            wait.until(
-                    ExpectedConditions.presenceOfElementLocated(
-                            By.tagName("body")
-                    )
-            );
+            System.out.println();
+            System.out.println("--------------- PAGE SOURCE CHECK ---------------");
 
-            System.out.println(
-                    "Body found."
-            );
+            if (pageSource.contains("DesktopNavBar")) {
 
+                System.out.println(
+                        "DesktopNavBar FOUND in page source."
+                );
 
-            // -------------------------------------------------
-            // 5. WAIT FOR APPLICATION TO RENDER
-            // -------------------------------------------------
+            } else {
 
-            System.out.println(
-                    "Waiting 5 seconds for React application..."
-            );
-
-            try {
-
-                Thread.sleep(5000);
-
-            } catch (InterruptedException e) {
-
-                Thread.currentThread().interrupt();
+                System.out.println(
+                        "DesktopNavBar NOT FOUND in page source."
+                );
             }
 
-
-            // =================================================
-            // PAGE DIAGNOSTICS
-            // =================================================
-
-            System.out.println();
-            System.out.println("=================================================");
-            System.out.println("PAGE DIAGNOSTICS");
-            System.out.println("=================================================");
-
-
-            // -------------------------------------------------
-            // URL
-            // -------------------------------------------------
-
-            System.out.println(
-                    "URL: "
-                            + driver.getCurrentUrl()
-            );
-
-
-            // -------------------------------------------------
-            // TITLE
-            // -------------------------------------------------
-
-            System.out.println(
-                    "TITLE: "
-                            + driver.getTitle()
-            );
-
-
-            // -------------------------------------------------
-            // PAGE SOURCE LENGTH
-            // -------------------------------------------------
-
-            String pageSource =
-                    driver.getPageSource();
-
-            System.out.println(
-                    "PAGE SOURCE LENGTH: "
-                            + pageSource.length()
-            );
-
-
-            // -------------------------------------------------
-            // BODY HTML
-            // -------------------------------------------------
-
-            WebElement body =
-                    driver.findElement(
-                            By.tagName("body")
-                    );
-
-            String bodyHtml =
-                    body.getAttribute("innerHTML");
-
-            System.out.println(
-                    "BODY HTML LENGTH: "
-                            + bodyHtml.length()
-            );
-
-
-            // -------------------------------------------------
-            // BODY TEXT
-            // -------------------------------------------------
-
-            String bodyText =
-                    body.getText();
-
-            System.out.println(
-                    "BODY TEXT LENGTH: "
-                            + bodyText.length()
-            );
-
-            System.out.println();
-            System.out.println(
-                    "VISIBLE BODY TEXT:"
-            );
-
-            System.out.println(
-                    bodyText
-            );
-
-
-            // -------------------------------------------------
-            // CHECK ROOT ELEMENTS
-            // -------------------------------------------------
-
-            System.out.println();
-            System.out.println(
-                    "ROOT ELEMENT CHECK"
-            );
-
-            checkElement(
-                    By.id("root"),
-                    "React root #root"
-            );
-
-            checkElement(
-                    By.id("__next"),
-                    "Next.js root #__next"
-            );
-
-            checkElement(
-                    By.id("app"),
-                    "Application #app"
-            );
-
-
-            // -------------------------------------------------
-            // CHECK DASHBOARD
-            // -------------------------------------------------
-
-            System.out.println();
-            System.out.println(
-                    "DASHBOARD ELEMENT CHECK"
-            );
-
-            checkElement(
-                    By.xpath(
-                            "//*[contains(@class,'DesktopNavBar')]"
-                    ),
-                    "DesktopNavBar"
-            );
-
-            checkElement(
-                    By.xpath(
-                            "//div[contains(@class,'DesktopNavBar_usernameContainer')]"
-                    ),
-                    "Username container"
-            );
-
-            checkElement(
-                    profileButton,
-                    "Profile button"
-            );
-
-            checkElement(
-                    usernameElement,
-                    "Username element"
-            );
-
-
-            // -------------------------------------------------
-            // CHECK USERNAME
-            // -------------------------------------------------
 
             if (pageSource.contains("surya99")) {
 
@@ -299,152 +217,134 @@ public class Logout_Page extends BasePage {
 
 
             // -------------------------------------------------
-            // CHECK DESKTOP NAV
+            // BODY TEXT
             // -------------------------------------------------
 
-            if (pageSource.contains("DesktopNavBar")) {
+            System.out.println();
+            System.out.println("--------------- VISIBLE BODY TEXT ---------------");
+
+            try {
+
+                WebElement body =
+                        driver.findElement(By.tagName("body"));
+
+                String bodyText = body.getText();
+
+                if (bodyText == null || bodyText.trim().isEmpty()) {
+
+                    System.out.println(
+                            "BODY TEXT IS EMPTY."
+                    );
+
+                } else {
+
+                    System.out.println(
+                            bodyText.substring(
+                                    0,
+                                    Math.min(
+                                            bodyText.length(),
+                                            3000
+                                    )
+                            )
+                    );
+                }
+
+            } catch (Exception e) {
 
                 System.out.println(
-                        "DesktopNavBar FOUND in page source."
-                );
-
-            } else {
-
-                System.out.println(
-                        "DesktopNavBar NOT FOUND in page source."
+                        "Unable to read body text: "
+                                + e.getMessage()
                 );
             }
 
 
-            // -------------------------------------------------
-            // IFRAME COUNT
-            // -------------------------------------------------
-
-            int iframeCount =
-                    driver.findElements(
-                            By.tagName("iframe")
-                    ).size();
-
-            System.out.println(
-                    "IFRAME COUNT: "
-                            + iframeCount
-            );
-
-
-            // -------------------------------------------------
-            // COOKIES
-            // -------------------------------------------------
-
-            System.out.println();
-            System.out.println(
-                    "COOKIE CHECK"
-            );
-
-            Set<Cookie> cookies =
-                    driver.manage().getCookies();
-
-            System.out.println(
-                    "COOKIE COUNT: "
-                            + cookies.size()
-            );
-
-            for (Cookie cookie : cookies) {
-
-                System.out.println(
-                        "Cookie: "
-                                + cookie.getName()
-                                + " = "
-                                + cookie.getValue()
-                );
-            }
-
-
-            // -------------------------------------------------
-            // SAVE SCREENSHOT
-            // -------------------------------------------------
-
-            saveScreenshot(
-                    "login_verification"
-            );
-
-
-            // -------------------------------------------------
-            // SAVE PAGE SOURCE
-            // -------------------------------------------------
-
-            savePageSource(
-                    "login_verification"
-            );
-
-
-            // =================================================
-            // FINAL CHECK
-            // =================================================
-
-            int profileCount =
-                    driver.findElements(
-                            profileButton
-                    ).size();
-
-            int usernameCount =
-                    driver.findElements(
-                            usernameElement
-                    ).size();
-
-
-            System.out.println();
             System.out.println(
                     "================================================="
             );
-
-            System.out.println(
-                    "PROFILE COUNT: "
-                            + profileCount
-            );
-
-            System.out.println(
-                    "USERNAME COUNT: "
-                            + usernameCount
-            );
-
-
-            if (profileCount > 0 ||
-                    usernameCount > 0) {
-
-                System.out.println(
-                        "LOGIN VERIFICATION SUCCESSFUL"
-                );
-
-            } else {
-
-                System.out.println(
-                        "LOGIN VERIFICATION FAILED"
-                );
-
-                System.out.println(
-                        "Dashboard URL exists, but dashboard UI "
-                                + "is not present in the DOM."
-                );
-
-                throw new RuntimeException(
-                        "Login verification failed: "
-                                + "dashboard UI not rendered."
-                );
-            }
 
         } catch (Exception e) {
 
-            System.out.println();
             System.out.println(
-                    "================================================="
+                    "Page diagnostic failed: "
+                            + e.getMessage()
+            );
+        }
+    }
+
+
+    // =========================================================
+    // CHECK PROFILE BUTTON
+    // =========================================================
+
+    private boolean isProfileButtonPresent() {
+
+        try {
+
+            By profileButton =
+                    By.xpath(
+                            "//div[contains(@class,'DesktopNavBar_usernameContainer')]//button"
+                    );
+
+            return !driver.findElements(profileButton).isEmpty();
+
+        } catch (Exception e) {
+
+            return false;
+        }
+    }
+
+
+    // =========================================================
+    // CHECK USERNAME
+    // =========================================================
+
+    private boolean isUsernamePresent() {
+
+        try {
+
+            By usernameLocator =
+                    By.xpath(
+                            "//div[contains(@class,'DesktopNavBar_nameText')]"
+                    );
+
+            return !driver.findElements(usernameLocator).isEmpty();
+
+        } catch (Exception e) {
+
+            return false;
+        }
+    }
+
+
+    // =========================================================
+    // VERIFY LOGIN SUCCESS
+    // =========================================================
+
+    public void verifyLoginSuccess() {
+
+        System.out.println();
+        System.out.println("=================================================");
+        System.out.println("STARTING LOGIN VERIFICATION");
+        System.out.println("=================================================");
+
+        try {
+
+            // -------------------------------------------------
+            // STEP 1 - WAIT FOR DASHBOARD URL
+            // -------------------------------------------------
+
+            System.out.println(
+                    "Waiting for dashboard URL..."
+            );
+
+            wait.until(
+                    ExpectedConditions.urlContains(
+                            "/userDashboard"
+                    )
             );
 
             System.out.println(
-                    "LOGIN VERIFICATION FAILED"
-            );
-
-            System.out.println(
-                    "================================================="
+                    "Dashboard URL detected."
             );
 
             System.out.println(
@@ -452,49 +352,168 @@ public class Logout_Page extends BasePage {
                             + driver.getCurrentUrl()
             );
 
+
+            // -------------------------------------------------
+            // STEP 2 - WAIT FOR PAGE LOAD
+            // -------------------------------------------------
+
             System.out.println(
-                    "Current Title: "
-                            + driver.getTitle()
+                    "Waiting for page body..."
+            );
+
+            wait.until(
+                    ExpectedConditions.presenceOfElementLocated(
+                            By.tagName("body")
+                    )
             );
 
             System.out.println(
-                    "Reason: "
-                            + e.getMessage()
+                    "Page body detected."
             );
 
+
+            // -------------------------------------------------
+            // STEP 3 - GIVE REACT UI TIME TO RENDER
+            // -------------------------------------------------
+
+            System.out.println(
+                    "Waiting for dashboard UI rendering..."
+            );
+
+            try {
+
+                Thread.sleep(3000);
+
+            } catch (InterruptedException e) {
+
+                Thread.currentThread().interrupt();
+            }
+
+
+            // -------------------------------------------------
+            // STEP 4 - PRINT DIAGNOSTICS
+            // -------------------------------------------------
+
+            printPageDiagnostics();
+
+
+            // -------------------------------------------------
+            // STEP 5 - CHECK PROFILE BUTTON
+            // -------------------------------------------------
+
+            boolean profilePresent =
+                    isProfileButtonPresent();
+
+            System.out.println(
+                    "Profile button present: "
+                            + profilePresent
+            );
+
+
+            // -------------------------------------------------
+            // STEP 6 - CHECK USERNAME
+            // -------------------------------------------------
+
+            boolean usernamePresent =
+                    isUsernamePresent();
+
+            System.out.println(
+                    "Username element present: "
+                            + usernamePresent
+            );
+
+
+            // -------------------------------------------------
+            // STEP 7 - VERIFY LOGIN
+            // -------------------------------------------------
+
+            if (profilePresent && usernamePresent) {
+
+                System.out.println();
+                System.out.println(
+                        "LOGIN VERIFICATION SUCCESSFUL"
+                );
+
+                System.out.println(
+                        "User profile button found."
+                );
+
+                System.out.println(
+                        "Username element found."
+                );
+
+                System.out.println(
+                        "================================================="
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // LOGIN VERIFICATION FAILED
+            // -------------------------------------------------
+
+            System.out.println();
+            System.out.println(
+                    "LOGIN VERIFICATION FAILED"
+            );
+
+            System.out.println(
+                    "Reason: Login verification failed: "
+                            + "dashboard UI not rendered."
+            );
+
+
+            // -------------------------------------------------
+            // TAKE FAILURE SCREENSHOT
+            // -------------------------------------------------
+
+            captureScreenshot(
+                    "login_verification_failed"
+            );
+
+
+            throw new RuntimeException(
+                    "Login verification failed: "
+                            + "dashboard UI not rendered."
+            );
+
+
+        } catch (RuntimeException e) {
+
+            /*
+             * If the failure is already our RuntimeException,
+             * don't create another message.
+             */
             throw e;
-        }
-    }
 
-
-    // =========================================================
-    // CHECK ELEMENT
-    // =========================================================
-
-    private void checkElement(
-            By locator,
-            String name) {
-
-        try {
-
-            int count =
-                    driver.findElements(
-                            locator
-                    ).size();
-
-            System.out.println(
-                    name
-                            + " -> "
-                            + count
-                            + " element(s)"
-            );
 
         } catch (Exception e) {
 
+            System.out.println();
             System.out.println(
-                    name
-                            + " -> ERROR: "
-                            + e.getMessage()
+                    "LOGIN VERIFICATION FAILED"
+            );
+
+            System.out.println(
+                    "Reason: " + e.getMessage()
+            );
+
+
+            // -------------------------------------------------
+            // TAKE FAILURE SCREENSHOT
+            // -------------------------------------------------
+
+            captureScreenshot(
+                    "login_verification_failed"
+            );
+
+
+            throw new RuntimeException(
+                    "Login verification failed: "
+                            + e.getMessage(),
+                    e
             );
         }
     }
@@ -507,28 +526,14 @@ public class Logout_Page extends BasePage {
     public void logout_session() {
 
         System.out.println();
-        System.out.println(
-                "================================================="
-        );
-
-        System.out.println(
-                "STARTING LOGOUT"
-        );
-
-        System.out.println(
-                "================================================="
-        );
+        System.out.println("=================================================");
+        System.out.println("STARTING LOGOUT");
+        System.out.println("=================================================");
 
         try {
 
-            System.out.println(
-                    "Current URL: "
-                            + driver.getCurrentUrl()
-            );
-
-
             // -------------------------------------------------
-            // DASHBOARD
+            // STEP 1 - WAIT FOR DASHBOARD URL
             // -------------------------------------------------
 
             wait.until(
@@ -539,16 +544,16 @@ public class Logout_Page extends BasePage {
 
 
             // -------------------------------------------------
-            // PROFILE BUTTON
+            // STEP 2 - FIND PROFILE BUTTON
             // -------------------------------------------------
 
-            System.out.println(
-                    "Checking profile button..."
-            );
+            By profileButton =
+                    By.xpath(
+                            "//div[contains(@class,'DesktopNavBar_usernameContainer')]//button"
+                    );
 
-            if (driver.findElements(
-                    profileButton
-            ).isEmpty()) {
+
+            if (driver.findElements(profileButton).isEmpty()) {
 
                 System.out.println(
                         "User profile button is not present."
@@ -563,26 +568,35 @@ public class Logout_Page extends BasePage {
 
 
             // -------------------------------------------------
-            // CLICK PROFILE
+            // STEP 3 - CLICK PROFILE BUTTON
             // -------------------------------------------------
 
-            WebElement profile =
+            System.out.println(
+                    "Waiting for profile button..."
+            );
+
+            WebElement user =
                     wait.until(
                             ExpectedConditions.elementToBeClickable(
                                     profileButton
                             )
                     );
 
+            user.click();
+
             System.out.println(
-                    "Profile button is clickable."
+                    "Profile button clicked."
             );
 
-            profile.click();
-
 
             // -------------------------------------------------
-            // CLICK LOGOUT
+            // STEP 4 - WAIT FOR LOGOUT
             // -------------------------------------------------
+
+            By logoutButton =
+                    By.xpath(
+                            "//li[normalize-space()='Logout']"
+                    );
 
             System.out.println(
                     "Waiting for Logout button..."
@@ -595,171 +609,72 @@ public class Logout_Page extends BasePage {
                             )
                     );
 
+
+            // -------------------------------------------------
+            // STEP 5 - CLICK LOGOUT
+            // -------------------------------------------------
+
             logout.click();
 
+            System.out.println(
+                    "Logout button clicked."
+            );
+
 
             // -------------------------------------------------
-            // VERIFY LOGOUT
+            // STEP 6 - VERIFY LOGOUT
             // -------------------------------------------------
 
-            wait.until(
-                    ExpectedConditions.not(
-                            ExpectedConditions.urlContains(
-                                    "/userDashboard"
-                            )
-                    )
-            );
+            try {
 
-            System.out.println(
-                    "LOGOUT SUCCESSFUL"
-            );
+                wait.until(
+                        ExpectedConditions.not(
+                                ExpectedConditions.urlContains(
+                                        "/userDashboard"
+                                )
+                        )
+                );
 
-        } catch (Exception e) {
+            } catch (Exception e) {
 
-            System.out.println(
-                    "LOGOUT FAILED"
-            );
-
-            System.out.println(
-                    "Reason: "
-                            + e.getMessage()
-            );
-
-            saveScreenshot(
-                    "logout_failed"
-            );
-
-            // Logout is cleanup, so don't throw.
-        }
-    }
-
-
-    // =========================================================
-    // SAVE SCREENSHOT
-    // =========================================================
-
-    private void saveScreenshot(
-            String name) {
-
-        try {
-
-            File screenshot =
-                    ((TakesScreenshot) driver)
-                            .getScreenshotAs(
-                                    OutputType.FILE
-                            );
-
-            String timestamp =
-                    new SimpleDateFormat(
-                            "yyyyMMdd_HHmmss"
-                    ).format(
-                            new Date()
-                    );
-
-            String folder =
-                    System.getProperty("user.dir")
-                            + File.separator
-                            + "screenshots"
-                            + File.separator
-                            + "login";
-
-            File directory =
-                    new File(folder);
-
-            if (!directory.exists()) {
-
-                directory.mkdirs();
-            }
-
-            File destination =
-                    new File(
-                            folder
-                                    + File.separator
-                                    + name
-                                    + "_"
-                                    + timestamp
-                                    + ".png"
-                    );
-
-            java.nio.file.Files.copy(
-                    screenshot.toPath(),
-                    destination.toPath()
-            );
-
-            System.out.println(
-                    "Screenshot saved: "
-                            + destination.getAbsolutePath()
-            );
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "Screenshot failed: "
-                            + e.getMessage()
-            );
-        }
-    }
-
-
-    // =========================================================
-    // SAVE PAGE SOURCE
-    // =========================================================
-
-    private void savePageSource(
-            String name) {
-
-        try {
-
-            String timestamp =
-                    new SimpleDateFormat(
-                            "yyyyMMdd_HHmmss"
-                    ).format(
-                            new Date()
-                    );
-
-            String folder =
-                    System.getProperty("user.dir")
-                            + File.separator
-                            + "screenshots"
-                            + File.separator
-                            + "login";
-
-            File directory =
-                    new File(folder);
-
-            if (!directory.exists()) {
-
-                directory.mkdirs();
-            }
-
-            File file =
-                    new File(
-                            folder
-                                    + File.separator
-                                    + name
-                                    + "_"
-                                    + timestamp
-                                    + ".html"
-                    );
-
-            try (FileWriter writer =
-                         new FileWriter(file)) {
-
-                writer.write(
-                        driver.getPageSource()
+                System.out.println(
+                        "URL did not change after logout."
                 );
             }
 
+
+            System.out.println();
             System.out.println(
-                    "Page source saved: "
-                            + file.getAbsolutePath()
+                    "LOGOUT COMPLETED"
             );
 
-        } catch (IOException e) {
-
             System.out.println(
-                    "Page source save failed: "
+                    "================================================="
+            );
+
+
+        } catch (Exception e) {
+
+            System.out.println();
+            System.out.println(
+                    "LOGOUT FAILED: "
                             + e.getMessage()
+            );
+
+
+            // -------------------------------------------------
+            // TAKE LOGOUT FAILURE SCREENSHOT
+            // -------------------------------------------------
+
+            captureScreenshot(
+                    "logout_failed"
+            );
+
+
+            throw new RuntimeException(
+                    "Logout failed: "
+                            + e.getMessage(),
+                    e
             );
         }
     }
