@@ -18,7 +18,6 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -45,15 +44,13 @@ public class BaseClass {
 
     @BeforeClass
     @Parameters({"os", "browser"})
-    public void setup(String os, String br) throws IOException {
+    public void setup(String os, String br)
+            throws IOException {
 
-        // -----------------------------------------------------
-        // Load config.properties
-        // -----------------------------------------------------
-
-        FileReader file = new FileReader(
-                "./src//test//resources//config.properties"
-        );
+        FileReader file =
+                new FileReader(
+                        "./src/test/resources/config.properties"
+                );
 
         p = new Properties();
 
@@ -61,98 +58,43 @@ public class BaseClass {
 
         file.close();
 
-        // -----------------------------------------------------
-        // Logger
-        // -----------------------------------------------------
-
-        logger = LogManager.getLogger(
-                this.getClass()
-        );
-
-        // -----------------------------------------------------
-        // Browser
-        // -----------------------------------------------------
+        logger =
+                LogManager.getLogger(
+                        this.getClass()
+                );
 
         switch (br.toLowerCase()) {
 
-            // =================================================
-            // CHROME
-            // =================================================
-
             case "chrome":
 
-                ChromeOptions chromeOptions =
-                        new ChromeOptions();
-
-                // Force desktop resolution
-                chromeOptions.addArguments(
-                        "--window-size=1920,1080"
-                );
-
-                chromeOptions.addArguments(
-                        "--force-device-scale-factor=1"
-                );
-
-                chromeOptions.addArguments(
-                        "--high-dpi-support=1"
-                );
-
-                chromeOptions.addArguments(
-                        "--disable-extensions"
-                );
-
-                driver = new ChromeDriver(
-                        chromeOptions
-                );
+                driver = new ChromeDriver();
 
                 break;
-
-            // =================================================
-            // EDGE
-            // =================================================
 
             case "edge":
 
-                EdgeOptions edgeOptions =
+                EdgeOptions options =
                         new EdgeOptions();
 
-                // IMPORTANT:
-                // Do NOT use --start-maximized here.
-                edgeOptions.addArguments(
+                options.addArguments(
                         "--window-size=1920,1080"
                 );
 
-                edgeOptions.addArguments(
-                        "--force-device-scale-factor=1"
+                options.addArguments(
+                        "--start-maximized"
                 );
 
-                edgeOptions.addArguments(
-                        "--high-dpi-support=1"
-                );
-
-                edgeOptions.addArguments(
-                        "--disable-extensions"
-                );
-
-                driver = new EdgeDriver(
-                        edgeOptions
-                );
+                driver =
+                        new EdgeDriver(options);
 
                 break;
-
-            // =================================================
-            // FIREFOX
-            // =================================================
 
             case "firefox":
 
-                driver = new FirefoxDriver();
+                driver =
+                        new FirefoxDriver();
 
                 break;
-
-            // =================================================
-            // INVALID BROWSER
-            // =================================================
 
             default:
 
@@ -161,64 +103,22 @@ public class BaseClass {
                 );
         }
 
-        // -----------------------------------------------------
-        // Delete cookies
-        // -----------------------------------------------------
-
+        // Delete previous cookies
         driver.manage().deleteAllCookies();
 
-        // -----------------------------------------------------
-        // Set desktop resolution
-        // -----------------------------------------------------
-
+        // Set browser size
         driver.manage().window().setSize(
                 new Dimension(1920, 1080)
         );
 
-        // -----------------------------------------------------
-        // Print actual browser size
-        // -----------------------------------------------------
-
-        System.out.println(
-                "\n=============================================="
-        );
-
-        System.out.println(
-                "Requested browser size: 1920 x 1080"
-        );
-
-        System.out.println(
-                "Actual browser size: "
-                + driver.manage().window().getSize()
-        );
-
-        System.out.println(
-                "==============================================\n"
-        );
-
-        // -----------------------------------------------------
-        // Timeout
-        // -----------------------------------------------------
-
+        // Implicit wait
         driver.manage().timeouts().implicitlyWait(
-                Duration.ofSeconds(5)
+                Duration.ofSeconds(10)
         );
 
-        driver.manage().timeouts().pageLoadTimeout(
-                Duration.ofSeconds(60)
-        );
-
-        // -----------------------------------------------------
         // Open application
-        // -----------------------------------------------------
-
         driver.get(
                 p.getProperty("url")
-        );
-
-        System.out.println(
-                "Application opened: "
-                + driver.getCurrentUrl()
         );
     }
 
@@ -229,27 +129,9 @@ public class BaseClass {
     @AfterClass
     public void teardown() {
 
-        System.out.println(
-                "Starting browser teardown..."
-        );
+        if (driver != null) {
 
-        try {
-
-            if (driver != null) {
-
-                driver.quit();
-
-                System.out.println(
-                        "Browser closed successfully."
-                );
-            }
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "Error while closing browser: "
-                    + e.getMessage()
-            );
+            driver.quit();
         }
     }
 
@@ -278,10 +160,6 @@ public class BaseClass {
     public void login()
             throws InterruptedException, IOException {
 
-        System.out.println(
-                "\n# STARTING LOGIN"
-        );
-
         NonLoggedin_HomePage hp =
                 new NonLoggedin_HomePage(driver);
 
@@ -303,10 +181,6 @@ public class BaseClass {
         Thread.sleep(1000);
 
         lp.clickloginbtn();
-
-        System.out.println(
-                "# LOGIN SUBMITTED"
-        );
     }
 
     // =========================================================
@@ -315,18 +189,9 @@ public class BaseClass {
 
     public void logout() {
 
-        System.out.println(
-                "Calling logout cleanup..."
-        );
-
         try {
 
             if (driver == null) {
-
-                System.out.println(
-                        "Driver is null. Logout skipped."
-                );
-
                 return;
             }
 
@@ -336,13 +201,6 @@ public class BaseClass {
             lp.logout_session();
 
         } catch (Exception e) {
-
-            /*
-             * Logout is cleanup.
-             *
-             * Do not allow logout failure to hide
-             * the original test result.
-             */
 
             System.out.println(
                     "Logout cleanup failed: "
@@ -361,7 +219,7 @@ public class BaseClass {
 
         String timeStamp =
                 new SimpleDateFormat(
-                        "yyyyMMdd_HHmmss"
+                        "yyyyMMddHHmmss"
                 ).format(new Date());
 
         TakesScreenshot ts =
@@ -372,32 +230,13 @@ public class BaseClass {
                         OutputType.FILE
                 );
 
-        // -----------------------------------------------------
-        // Store screenshots inside target/screenshots
-        // -----------------------------------------------------
-
-        String targetDirectory =
-                System.getProperty("user.dir")
-                + File.separator
-                + "target"
-                + File.separator
-                + "screenshots";
-
-        File directory =
-                new File(targetDirectory);
-
-        if (!directory.exists()) {
-
-            directory.mkdirs();
-        }
-
         String targetFilePath =
-                targetDirectory
-                + File.separator
-                + tname
-                + "_"
-                + timeStamp
-                + ".png";
+                System.getProperty("user.dir")
+                        + "\\screenshots\\"
+                        + tname
+                        + "_"
+                        + timeStamp
+                        + ".png";
 
         File targetFile =
                 new File(targetFilePath);
@@ -405,11 +244,6 @@ public class BaseClass {
         FileUtils.copyFile(
                 sourceFile,
                 targetFile
-        );
-
-        System.out.println(
-                "Screenshot saved: "
-                + targetFilePath
         );
 
         return targetFilePath;
