@@ -18,9 +18,9 @@ public class Logout_Page extends BasePage{
 
 	}
 	
-	@FindBy(xpath="//div[@class='DesktopNavBar_nameText__hAqgn']")
+	@FindBy(xpath="//div[text()='S']")
+	//div[@class='DesktopNavBar_nameText__hAqgn']
 	WebElement usericon;
-	
 	@FindBy(xpath="//li[normalize-space()='Logout']")
 	WebElement btn_logout;
 
