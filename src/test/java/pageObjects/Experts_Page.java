@@ -1,3 +1,4 @@
+
 package pageObjects;
 
 import java.io.File;
@@ -26,13 +27,14 @@ public class Experts_Page extends BasePage {
         super(driver);
 
         /*
-         * Keep the browser size consistent between local and GitHub Actions.
+         * Keep browser size consistent between local and GitHub Actions.
          */
         try {
             driver.manage().window().setSize(new Dimension(1920, 1080));
         } catch (Exception e) {
             System.out.println(
-                    "Unable to set browser window size: " + e.getMessage());
+                    "Unable to set browser window size: " + e.getMessage()
+            );
         }
 
         wait = new WebDriverWait(
@@ -50,7 +52,6 @@ public class Experts_Page extends BasePage {
 
     /*
      * Angular Material renders mat-option inside the CDK overlay.
-     * Searching from the overlay makes the locator more reliable.
      */
     private final By careerOption = By.xpath(
             "//div[contains(@class,'cdk-overlay-container')]"
@@ -64,6 +65,15 @@ public class Experts_Page extends BasePage {
 
     private final By categoryOverlay = By.cssSelector(
             ".cdk-overlay-container .cdk-overlay-pane"
+    );
+
+    /*
+     * Angular Material backdrop.
+     * This can remain on the page for a short time after clicking
+     * an option and can intercept the next click.
+     */
+    private final By overlayBackdrop = By.cssSelector(
+            ".cdk-overlay-backdrop"
     );
 
     // =========================================================
@@ -120,7 +130,7 @@ public class Experts_Page extends BasePage {
         System.out.println("=================================================");
 
         // -----------------------------------------------------
-        // Print browser window size
+        // Browser size
         // -----------------------------------------------------
 
         try {
@@ -205,7 +215,7 @@ public class Experts_Page extends BasePage {
         );
 
         // -----------------------------------------------------
-        // Wait until Angular Material says dropdown is open
+        // Wait until dropdown is open
         // -----------------------------------------------------
 
         try {
@@ -368,10 +378,10 @@ public class Experts_Page extends BasePage {
                             + "initial dropdown click."
             );
 
-            /*
-             * Sometimes Angular Material needs another click
-             * when the page is running slowly in CI.
-             */
+            // -------------------------------------------------
+            // Retry
+            // -------------------------------------------------
+
             try {
 
                 System.out.println(
@@ -457,7 +467,7 @@ public class Experts_Page extends BasePage {
         }
 
         // -----------------------------------------------------
-        // Take screenshot after DOM inspection
+        // Screenshot after DOM inspection
         // -----------------------------------------------------
 
         takeScreenshot(
@@ -504,6 +514,17 @@ public class Experts_Page extends BasePage {
             System.out.println(
                     "Career option CLICKED successfully."
             );
+
+            /*
+             * IMPORTANT:
+             *
+             * Angular Material can keep the backdrop alive for a
+             * short time after clicking an option.
+             *
+             * If the next dropdown is clicked immediately,
+             * the backdrop can intercept the click.
+             */
+            waitForOverlayToDisappear();
 
         } catch (Exception e) {
 
@@ -574,22 +595,130 @@ public class Experts_Page extends BasePage {
     }
 
     // =========================================================
+    // WAIT FOR ANGULAR MATERIAL OVERLAY TO DISAPPEAR
+    // =========================================================
+
+    private void waitForOverlayToDisappear() {
+
+        System.out.println(
+                "Waiting for category overlay to disappear..."
+        );
+
+        try {
+
+            /*
+             * Wait for the actual backdrop to disappear.
+             */
+            wait.until(
+                    ExpectedConditions.invisibilityOfElementLocated(
+                            overlayBackdrop
+                    )
+            );
+
+            System.out.println(
+                    "Angular Material backdrop disappeared."
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Backdrop did not disappear within the wait. "
+                            + "Checking dropdown state..."
+            );
+        }
+
+        /*
+         * Also verify that the category select is closed.
+         */
+        try {
+
+            wait.until(
+                    ExpectedConditions.attributeToBe(
+                            clk_category,
+                            "aria-expanded",
+                            "false"
+                    )
+            );
+
+            System.out.println(
+                    "Category dropdown is CLOSED."
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Category aria-expanded did not become false."
+            );
+        }
+    }
+
+    // =========================================================
     // SELECT LANGUAGE
     // =========================================================
 
     public void select_language() {
 
+        System.out.println(
+                "================================================="
+        );
+
+        System.out.println(
+                "STARTING LANGUAGE SELECTION"
+        );
+
+        System.out.println(
+                "================================================="
+        );
+
+        /*
+         * Make sure any previous Angular overlay is gone.
+         */
+        waitForAnyOverlayToDisappear();
+
+        wait.until(
+                ExpectedConditions.visibilityOf(
+                        clk_language
+                )
+        );
+
         wait.until(
                 ExpectedConditions.elementToBeClickable(
                         clk_language
                 )
-        ).click();
+        );
+
+        try {
+
+            clk_language.click();
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Language normal click failed. "
+                            + "Trying JavaScript click..."
+            );
+
+            ((org.openqa.selenium.JavascriptExecutor) driver)
+                    .executeScript(
+                            "arguments[0].click();",
+                            clk_language
+                    );
+        }
 
         wait.until(
                 ExpectedConditions.elementToBeClickable(
                         hindiOption
                 )
         ).click();
+
+        /*
+         * Wait until Language overlay closes.
+         */
+        waitForAnyOverlayToDisappear();
+
+        System.out.println(
+                "Hindi language selected successfully."
+        );
     }
 
     // =========================================================
@@ -598,17 +727,71 @@ public class Experts_Page extends BasePage {
 
     public void select_mode() {
 
+        System.out.println(
+                "================================================="
+        );
+
+        System.out.println(
+                "STARTING MODE SELECTION"
+        );
+
+        System.out.println(
+                "================================================="
+        );
+
+        /*
+         * This is especially important in GitHub Actions.
+         */
+        waitForAnyOverlayToDisappear();
+
+        wait.until(
+                ExpectedConditions.visibilityOf(
+                        clk_mode
+                )
+        );
+
         wait.until(
                 ExpectedConditions.elementToBeClickable(
                         clk_mode
                 )
-        ).click();
+        );
+
+        try {
+
+            clk_mode.click();
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Mode normal click failed. "
+                            + "Trying JavaScript click..."
+            );
+
+            ((org.openqa.selenium.JavascriptExecutor) driver)
+                    .executeScript(
+                            "arguments[0].click();",
+                            clk_mode
+                    );
+        }
+
+        System.out.println(
+                "Mode dropdown opened."
+        );
 
         wait.until(
                 ExpectedConditions.elementToBeClickable(
                         videoOption
                 )
         ).click();
+
+        /*
+         * Wait until Mode overlay closes.
+         */
+        waitForAnyOverlayToDisappear();
+
+        System.out.println(
+                "Video mode selected successfully."
+        );
     }
 
     // =========================================================
@@ -617,17 +800,106 @@ public class Experts_Page extends BasePage {
 
     public void select_gender() {
 
+        System.out.println(
+                "================================================="
+        );
+
+        System.out.println(
+                "STARTING GENDER SELECTION"
+        );
+
+        System.out.println(
+                "================================================="
+        );
+
+        /*
+         * Make sure no previous Angular overlay is blocking
+         * the Gender dropdown.
+         */
+        waitForAnyOverlayToDisappear();
+
+        wait.until(
+                ExpectedConditions.visibilityOf(
+                        clk_gender
+                )
+        );
+
         wait.until(
                 ExpectedConditions.elementToBeClickable(
                         clk_gender
                 )
-        ).click();
+        );
+
+        try {
+
+            clk_gender.click();
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Gender normal click failed. "
+                            + "Trying JavaScript click..."
+            );
+
+            ((org.openqa.selenium.JavascriptExecutor) driver)
+                    .executeScript(
+                            "arguments[0].click();",
+                            clk_gender
+                    );
+        }
+
+        System.out.println(
+                "Gender dropdown opened."
+        );
 
         wait.until(
                 ExpectedConditions.elementToBeClickable(
                         femaleOption
                 )
         ).click();
+
+        /*
+         * Wait until Gender overlay closes.
+         */
+        waitForAnyOverlayToDisappear();
+
+        System.out.println(
+                "Female gender selected successfully."
+        );
+    }
+
+    // =========================================================
+    // WAIT FOR ANY ANGULAR OVERLAY
+    // =========================================================
+
+    private void waitForAnyOverlayToDisappear() {
+
+        try {
+
+            /*
+             * Wait for backdrop to disappear if it exists.
+             */
+            List<WebElement> backdrops =
+                    driver.findElements(
+                            overlayBackdrop
+                    );
+
+            if (!backdrops.isEmpty()) {
+
+                wait.until(
+                        ExpectedConditions.invisibilityOfElementLocated(
+                                overlayBackdrop
+                        )
+                );
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Overlay backdrop check: "
+                            + e.getMessage()
+            );
+        }
     }
 
     // =========================================================
@@ -636,11 +908,39 @@ public class Experts_Page extends BasePage {
 
     public void c_bookappoinment() {
 
+        System.out.println(
+                "================================================="
+        );
+
+        System.out.println(
+                "CLICKING BOOK APPOINTMENT"
+        );
+
+        System.out.println(
+                "================================================="
+        );
+
+        /*
+         * Make sure no Angular Material overlay is blocking
+         * the button.
+         */
+        waitForAnyOverlayToDisappear();
+
+        wait.until(
+                ExpectedConditions.visibilityOf(
+                        clk_bookAppoinment
+                )
+        );
+
         wait.until(
                 ExpectedConditions.elementToBeClickable(
                         clk_bookAppoinment
                 )
         ).click();
+
+        System.out.println(
+                "BOOK APPOINTMENT CLICKED."
+        );
     }
 
     // =========================================================
@@ -690,3 +990,4 @@ public class Experts_Page extends BasePage {
         }
     }
 }
+
