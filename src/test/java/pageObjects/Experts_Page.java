@@ -8,84 +8,110 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import java.util.List;
+import org.openqa.selenium.By;
 
-public class Experts_Page extends BasePage{
-    WebDriverWait wait;
+public class Experts_Page extends BasePage {
 
-	public Experts_Page(WebDriver driver) {
-		super(driver);
+    private WebDriverWait wait;
+
+    public Experts_Page(WebDriver driver) {
+        super(driver);
         wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+    }
 
-	}
-	
-	//@FindBy(xpath="//input[@placeholder='Search Expert by Name' or @id=\"mat-input-0\"]")
-	//WebElement search_field;
-	
-	@FindBy(xpath="//mat-select[@name='category']")
-	WebElement clk_category;
-	
-	@FindBy(xpath="//mat-option//span[normalize-space()='Career']")
-	WebElement select_category;
-	
-	@FindBy(xpath="//mat-select[@name='language']")
-	WebElement clk_language;
-	
-	@FindBy(xpath="//span[normalize-space()='Hindi']")
-	WebElement select_language;
-	
-	@FindBy(xpath="//mat-select[@name='mode']")
-	WebElement clk_mode;
-	
-	@FindBy(xpath="//span[normalize-space()='Video']")
-	WebElement select_mode;
-	
-	@FindBy(xpath="//mat-select[@name='gender']")
-	WebElement clk_gender;
-	
-	@FindBy(xpath="//span[normalize-space()='Female']")
-	WebElement select_gender;
-	
-	@FindBy(xpath="//span[normalize-space()='BOOK APPOINTMENT']")
-	WebElement clk_bookAppoinment; 
-	
-	public void select_category()
-	{
-		//clk_category.click();
-		//select_category.click();
-		//driver.switchTo().activeElement().sendKeys(Keys.ESCAPE);
-		wait.until(ExpectedConditions.elementToBeClickable(clk_category))
-        .click();
+    @FindBy(xpath="//mat-select[@name='category']")
+    private WebElement clk_category;
 
-        wait.until(ExpectedConditions.elementToBeClickable(select_category))
-        .click();
-	}
+    @FindBy(xpath="//mat-option[.//span[normalize-space()='Career']]")
+    private WebElement select_category;
 
-	public void select_language()
-	{
-		clk_language.click();
-		select_language.click();
-		driver.switchTo().activeElement().sendKeys(Keys.ESCAPE);
-	}
-	
-	public void select_mode()
-	{
-		clk_mode.click();
-		select_mode.click();
-		driver.switchTo().activeElement().sendKeys(Keys.ESCAPE);
-	}
-	
-	public void select_gender()
-	{
-		clk_gender.click();
-		select_gender.click();
-		driver.switchTo().activeElement().sendKeys(Keys.ESCAPE);
-	}
-	
-	public void c_bookappoinment()
-	{
-		clk_bookAppoinment.click();
-	}
+    @FindBy(xpath="//mat-select[@name='language']")
+    private WebElement clk_language;
+
+    @FindBy(xpath="//mat-option[.//span[normalize-space()='Hindi']]")
+    private WebElement select_language;
+
+    @FindBy(xpath="//mat-select[@name='mode']")
+    private WebElement clk_mode;
+
+    @FindBy(xpath="//mat-option[.//span[normalize-space()='Video']]")
+    private WebElement select_mode;
+
+    @FindBy(xpath="//mat-select[@name='gender']")
+    private WebElement clk_gender;
+
+    @FindBy(xpath="//mat-option[.//span[normalize-space()='Female']]")
+    private WebElement select_gender;
+
+    @FindBy(xpath="//span[normalize-space()='BOOK APPOINTMENT']")
+    private WebElement clk_bookAppoinment;
+
+
+    public void select_category() {
+
+        wait.until(ExpectedConditions.elementToBeClickable(clk_category))
+                .click();
+
+        System.out.println("===== CATEGORY DROPDOWN OPENED =====");
+
+        List<WebElement> options =
+                driver.findElements(By.cssSelector("mat-option"));
+
+        System.out.println("Option count: " + options.size());
+
+        for (WebElement option : options) {
+            System.out.println("OPTION: [" + option.getText() + "]");
+        }
+
+        System.out.println("====================================");
+
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//mat-option[.//span[normalize-space()='Career']]")
+        )).click();
+    }
 
 
 
+    public void select_language() {
+
+        wait.until(ExpectedConditions.elementToBeClickable(clk_language))
+                .click();
+
+        wait.until(ExpectedConditions.elementToBeClickable(select_language))
+                .click();
+
+        driver.switchTo().activeElement().sendKeys(Keys.ESCAPE);
+    }
+
+
+    public void select_mode() {
+
+        wait.until(ExpectedConditions.elementToBeClickable(clk_mode))
+                .click();
+
+        wait.until(ExpectedConditions.elementToBeClickable(select_mode))
+                .click();
+
+        driver.switchTo().activeElement().sendKeys(Keys.ESCAPE);
+    }
+
+
+    public void select_gender() {
+
+        wait.until(ExpectedConditions.elementToBeClickable(clk_gender))
+                .click();
+
+        wait.until(ExpectedConditions.elementToBeClickable(select_gender))
+                .click();
+
+        driver.switchTo().activeElement().sendKeys(Keys.ESCAPE);
+    }
+
+
+    public void c_bookappoinment() {
+
+        wait.until(ExpectedConditions.elementToBeClickable(clk_bookAppoinment))
+                .click();
+    }
 }
