@@ -41,21 +41,11 @@ public class Logout_Page {
     // LOCATORS
     // =========================================================
 
-    /*
-     * Mobile hamburger menu.
-     *
-     * HTML:
-     * <svg data-testid="MenuIcon">
-     */
+    // Mobile 3-line menu
     private final By menuButton =
             By.cssSelector("[data-testid='MenuIcon']");
 
-    /*
-     * Logout option inside mobile menu.
-     *
-     * HTML:
-     * <span>Logout</span>
-     */
+    // Logout option inside mobile menu
     private final By logoutButton =
             By.xpath("//span[normalize-space()='Logout']");
 
@@ -112,10 +102,15 @@ public class Logout_Page {
                     StandardCopyOption.REPLACE_EXISTING
             );
 
+            System.out.println(
+                    "[SCREENSHOT] Saved: "
+                    + screenshotPath
+            );
+
         } catch (IOException e) {
 
             System.out.println(
-                    "Screenshot failed: "
+                    "[SCREENSHOT] Failed: "
                     + e.getMessage()
             );
         }
@@ -126,6 +121,10 @@ public class Logout_Page {
     // =========================================================
 
     private void waitForPageToLoad() {
+
+        System.out.println(
+                "[PAGE LOAD] Waiting for page to load..."
+        );
 
         wait.until(
                 webDriver -> {
@@ -139,6 +138,10 @@ public class Logout_Page {
                     return "complete".equals(state);
                 }
         );
+
+        System.out.println(
+                "[PAGE LOAD] Page loaded successfully."
+        );
     }
 
     // =========================================================
@@ -147,9 +150,33 @@ public class Logout_Page {
 
     public void verifyLoginSuccess() {
 
+        System.out.println(
+                "\n=================================================="
+        );
+
+        System.out.println(
+                "              LOGIN VERIFICATION"
+        );
+
+        System.out.println(
+                "=================================================="
+        );
+
         try {
 
+            // -------------------------------------------------
+            // 1. Wait for page load
+            // -------------------------------------------------
+
             waitForPageToLoad();
+
+            // -------------------------------------------------
+            // 2. Wait for dashboard URL
+            // -------------------------------------------------
+
+            System.out.println(
+                    "[LOGIN] Waiting for dashboard..."
+            );
 
             wait.until(
                     ExpectedConditions.urlContains(
@@ -157,7 +184,34 @@ public class Logout_Page {
                     )
             );
 
+            System.out.println(
+                    "[LOGIN SUCCESS] Dashboard URL detected."
+            );
+
+            System.out.println(
+                    "[LOGIN SUCCESS] Current URL: "
+                    + driver.getCurrentUrl()
+            );
+
+            System.out.println(
+                    "=================================================="
+            );
+
         } catch (Exception e) {
+
+            System.out.println(
+                    "\n[LOGIN FAILED] Login verification failed."
+            );
+
+            System.out.println(
+                    "[LOGIN FAILED] Current URL: "
+                    + driver.getCurrentUrl()
+            );
+
+            System.out.println(
+                    "[LOGIN FAILED] Reason: "
+                    + e.getMessage()
+            );
 
             captureScreenshot(
                     "login_verification_failed"
@@ -177,6 +231,10 @@ public class Logout_Page {
 
     private void clickMenu() {
 
+        System.out.println(
+                "\n[LOGOUT] Waiting for mobile menu..."
+        );
+
         try {
 
             WebElement menu =
@@ -187,9 +245,30 @@ public class Logout_Page {
                                     )
                     );
 
+            System.out.println(
+                    "[LOGOUT] Mobile 3-line menu found."
+            );
+
             menu.click();
 
+            System.out.println(
+                    "[LOGOUT SUCCESS] Mobile menu clicked successfully."
+            );
+
+            captureScreenshot(
+                    "menu_clicked"
+            );
+
         } catch (Exception e) {
+
+            System.out.println(
+                    "[LOGOUT FAILED] Unable to click mobile menu."
+            );
+
+            System.out.println(
+                    "[LOGOUT FAILED] Reason: "
+                    + e.getMessage()
+            );
 
             captureScreenshot(
                     "menu_click_failed"
@@ -209,6 +288,10 @@ public class Logout_Page {
 
     private void clickLogout() {
 
+        System.out.println(
+                "\n[LOGOUT] Waiting for Logout option..."
+        );
+
         try {
 
             WebElement logout =
@@ -219,9 +302,30 @@ public class Logout_Page {
                                     )
                     );
 
+            System.out.println(
+                    "[LOGOUT] Logout option found."
+            );
+
             logout.click();
 
+            System.out.println(
+                    "[LOGOUT SUCCESS] Logout button clicked successfully."
+            );
+
+            captureScreenshot(
+                    "logout_clicked"
+            );
+
         } catch (Exception e) {
+
+            System.out.println(
+                    "[LOGOUT FAILED] Unable to click Logout."
+            );
+
+            System.out.println(
+                    "[LOGOUT FAILED] Reason: "
+                    + e.getMessage()
+            );
 
             captureScreenshot(
                     "logout_click_failed"
@@ -236,10 +340,14 @@ public class Logout_Page {
     }
 
     // =========================================================
-    // VERIFY LOGOUT
+    // VERIFY LOGOUT SUCCESS
     // =========================================================
 
     private void verifyLogoutSuccess() {
+
+        System.out.println(
+                "\n[LOGOUT] Verifying logout..."
+        );
 
         try {
 
@@ -251,7 +359,34 @@ public class Logout_Page {
                     )
             );
 
+            System.out.println(
+                    "[LOGOUT SUCCESS] Logout completed successfully."
+            );
+
+            System.out.println(
+                    "[LOGOUT SUCCESS] Current URL: "
+                    + driver.getCurrentUrl()
+            );
+
+            System.out.println(
+                    "=================================================="
+            );
+
         } catch (Exception e) {
+
+            System.out.println(
+                    "[LOGOUT FAILED] Logout verification failed."
+            );
+
+            System.out.println(
+                    "[LOGOUT FAILED] Current URL: "
+                    + driver.getCurrentUrl()
+            );
+
+            System.out.println(
+                    "[LOGOUT FAILED] Reason: "
+                    + e.getMessage()
+            );
 
             captureScreenshot(
                     "logout_verification_failed"
@@ -271,25 +406,91 @@ public class Logout_Page {
 
     public void logout_session() {
 
+        System.out.println(
+                "\n=================================================="
+        );
+
+        System.out.println(
+                "              STARTING LOGOUT"
+        );
+
+        System.out.println(
+                "=================================================="
+        );
+
         try {
 
-            // Make sure we are on dashboard
+            // -------------------------------------------------
+            // 1. Make sure dashboard is open
+            // -------------------------------------------------
+
+            System.out.println(
+                    "[LOGOUT] Checking dashboard..."
+            );
+
             wait.until(
                     ExpectedConditions.urlContains(
                             "userDashboard"
                     )
             );
 
-            // Step 1: Click 3-line menu
+            System.out.println(
+                    "[LOGOUT] Dashboard detected."
+            );
+
+            // -------------------------------------------------
+            // 2. Click 3-line mobile menu
+            // -------------------------------------------------
+
             clickMenu();
 
-            // Step 2: Click Logout
+            // -------------------------------------------------
+            // 3. Click Logout
+            // -------------------------------------------------
+
             clickLogout();
 
-            // Step 3: Verify logout
+            // -------------------------------------------------
+            // 4. Verify Logout
+            // -------------------------------------------------
+
             verifyLogoutSuccess();
 
+            System.out.println(
+                    "\n=================================================="
+            );
+
+            System.out.println(
+                    "           LOGOUT COMPLETED SUCCESSFULLY"
+            );
+
+            System.out.println(
+                    "=================================================="
+            );
+
         } catch (Exception e) {
+
+            System.out.println(
+                    "\n=================================================="
+            );
+
+            System.out.println(
+                    "                 LOGOUT FAILED"
+            );
+
+            System.out.println(
+                    "=================================================="
+            );
+
+            System.out.println(
+                    "[LOGOUT FAILED] Current URL: "
+                    + driver.getCurrentUrl()
+            );
+
+            System.out.println(
+                    "[LOGOUT FAILED] Reason: "
+                    + e.getMessage()
+            );
 
             captureScreenshot(
                     "logout_failed"
