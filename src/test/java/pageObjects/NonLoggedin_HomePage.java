@@ -23,8 +23,10 @@ public class NonLoggedin_HomePage extends BasePage{
 	
 	public void clickloginbtn() throws IOException
 	{
-		 BaseClass.CaptureScreen("Before_Click");
 
-		loginbtn.click();
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+	    wait.until(ExpectedConditions.elementToBeClickable(loginbtn)).click();
+		//loginbtn.click();
 	}
 }
