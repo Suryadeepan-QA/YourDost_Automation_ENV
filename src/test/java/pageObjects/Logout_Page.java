@@ -347,8 +347,33 @@ public class Logout_Page {
         System.out.println(
                 "Dashboard UI rendered."
         );
-    }
+    
 
+    System.out.println(
+            "Browser size: "
+            + driver.manage().window().getSize()
+    );
+
+    Long innerWidth =
+            (Long) ((JavascriptExecutor) driver)
+                    .executeScript(
+                            "return window.innerWidth;"
+                    );
+
+    Long innerHeight =
+            (Long) ((JavascriptExecutor) driver)
+                    .executeScript(
+                            "return window.innerHeight;"
+                    );
+
+    System.out.println(
+            "Viewport size: "
+            + innerWidth
+            + " x "
+            + innerHeight
+    );
+    }	
+    
     // =========================================================
     // FIND PROFILE BUTTON
     // =========================================================

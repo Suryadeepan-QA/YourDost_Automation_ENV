@@ -44,15 +44,15 @@ public class BaseClass {
     // =========================================================
 
     @BeforeClass
-    @Parameters({ "os", "browser" })
+    @Parameters({"os", "browser"})
     public void setup(String os, String br) throws IOException {
 
-        // ---------------------------------------------------------
+        // -----------------------------------------------------
         // Load config.properties
-        // ---------------------------------------------------------
+        // -----------------------------------------------------
 
         FileReader file = new FileReader(
-                "./src/test/resources/config.properties"
+                "./src//test//resources//config.properties"
         );
 
         p = new Properties();
@@ -61,164 +61,156 @@ public class BaseClass {
 
         file.close();
 
-        // ---------------------------------------------------------
+        // -----------------------------------------------------
         // Logger
-        // ---------------------------------------------------------
+        // -----------------------------------------------------
 
         logger = LogManager.getLogger(
                 this.getClass()
         );
 
-        // ---------------------------------------------------------
+        // -----------------------------------------------------
         // Browser
-        // ---------------------------------------------------------
+        // -----------------------------------------------------
 
         switch (br.toLowerCase()) {
 
-        // =========================================================
-        // CHROME
-        // =========================================================
+            // =================================================
+            // CHROME
+            // =================================================
 
-        case "chrome":
+            case "chrome":
 
-            ChromeOptions chromeOptions =
-                    new ChromeOptions();
+                ChromeOptions chromeOptions =
+                        new ChromeOptions();
 
-            // Force desktop viewport
-            chromeOptions.addArguments(
-                    "--window-size=1920,1080"
-            );
+                // Force desktop resolution
+                chromeOptions.addArguments(
+                        "--window-size=1920,1080"
+                );
 
-            chromeOptions.addArguments(
-                    "--start-maximized"
-            );
+                chromeOptions.addArguments(
+                        "--force-device-scale-factor=1"
+                );
 
-            driver =
-                    new ChromeDriver(chromeOptions);
+                chromeOptions.addArguments(
+                        "--high-dpi-support=1"
+                );
 
-            break;
+                chromeOptions.addArguments(
+                        "--disable-extensions"
+                );
 
-        // =========================================================
-        // EDGE
-        // =========================================================
+                driver = new ChromeDriver(
+                        chromeOptions
+                );
 
-        case "edge":
+                break;
 
-            EdgeOptions edgeOptions =
-                    new EdgeOptions();
+            // =================================================
+            // EDGE
+            // =================================================
 
-            // -----------------------------------------------------
-            // Force desktop viewport
-            // -----------------------------------------------------
+            case "edge":
 
-            edgeOptions.addArguments(
-                    "--window-size=1920,1080"
-            );
+                EdgeOptions edgeOptions =
+                        new EdgeOptions();
 
-            edgeOptions.addArguments(
-                    "--start-maximized"
-            );
+                // IMPORTANT:
+                // Do NOT use --start-maximized here.
+                edgeOptions.addArguments(
+                        "--window-size=1920,1080"
+                );
 
-            driver =
-                    new EdgeDriver(edgeOptions);
+                edgeOptions.addArguments(
+                        "--force-device-scale-factor=1"
+                );
 
-            break;
+                edgeOptions.addArguments(
+                        "--high-dpi-support=1"
+                );
 
-        // =========================================================
-        // FIREFOX
-        // =========================================================
+                edgeOptions.addArguments(
+                        "--disable-extensions"
+                );
 
-        case "firefox":
+                driver = new EdgeDriver(
+                        edgeOptions
+                );
 
-            driver =
-                    new FirefoxDriver();
+                break;
 
-            break;
+            // =================================================
+            // FIREFOX
+            // =================================================
 
-        // =========================================================
-        // INVALID BROWSER
-        // =========================================================
+            case "firefox":
 
-        default:
+                driver = new FirefoxDriver();
 
-            throw new IllegalArgumentException(
-                    "Invalid browser: " + br
-            );
+                break;
+
+            // =================================================
+            // INVALID BROWSER
+            // =================================================
+
+            default:
+
+                throw new IllegalArgumentException(
+                        "Invalid browser: " + br
+                );
         }
 
-        // =========================================================
-        // DELETE COOKIES
-        // =========================================================
+        // -----------------------------------------------------
+        // Delete cookies
+        // -----------------------------------------------------
 
         driver.manage().deleteAllCookies();
 
-        // =========================================================
-        // FORCE DESKTOP WINDOW SIZE
-        // =========================================================
+        // -----------------------------------------------------
+        // Set desktop resolution
+        // -----------------------------------------------------
 
         driver.manage().window().setSize(
                 new Dimension(1920, 1080)
         );
 
-        // =========================================================
-        // PRINT BROWSER SIZE
-        // =========================================================
+        // -----------------------------------------------------
+        // Print actual browser size
+        // -----------------------------------------------------
 
         System.out.println(
-                "=========================================="
+                "\n=============================================="
         );
 
         System.out.println(
-                "Browser: " + br
+                "Requested browser size: 1920 x 1080"
         );
 
         System.out.println(
-                "Window Width: "
-                + driver.manage()
-                        .window()
-                        .getSize()
-                        .getWidth()
+                "Actual browser size: "
+                + driver.manage().window().getSize()
         );
 
         System.out.println(
-                "Window Height: "
-                + driver.manage()
-                        .window()
-                        .getSize()
-                        .getHeight()
+                "==============================================\n"
         );
 
-        System.out.println(
-                "=========================================="
-        );
-
-        // =========================================================
-        // IMPLICIT WAIT
-        // =========================================================
+        // -----------------------------------------------------
+        // Timeout
+        // -----------------------------------------------------
 
         driver.manage().timeouts().implicitlyWait(
                 Duration.ofSeconds(5)
         );
 
-        // =========================================================
-        // PAGE LOAD TIMEOUT
-        // =========================================================
-
         driver.manage().timeouts().pageLoadTimeout(
-                Duration.ofSeconds(300)
+                Duration.ofSeconds(60)
         );
 
-        // =========================================================
-        // SCRIPT TIMEOUT
-        // =========================================================
-
-        driver.manage().timeouts().scriptTimeout(
-                Duration.ofSeconds(30)
-        );
-
-        // =========================================================
-        // OPEN APPLICATION
-        // =========================================================
+        // -----------------------------------------------------
+        // Open application
+        // -----------------------------------------------------
 
         driver.get(
                 p.getProperty("url")
@@ -290,18 +282,10 @@ public class BaseClass {
                 "\n# STARTING LOGIN"
         );
 
-        // ---------------------------------------------------------
-        // Home Page
-        // ---------------------------------------------------------
-
         NonLoggedin_HomePage hp =
                 new NonLoggedin_HomePage(driver);
 
         hp.clickloginbtn();
-
-        // ---------------------------------------------------------
-        // Login Popup
-        // ---------------------------------------------------------
 
         Login_Popup lp =
                 new Login_Popup(driver);
@@ -321,7 +305,7 @@ public class BaseClass {
         lp.clickloginbtn();
 
         System.out.println(
-                "# LOGIN BUTTON CLICKED"
+                "# LOGIN SUBMITTED"
         );
     }
 
@@ -356,8 +340,8 @@ public class BaseClass {
             /*
              * Logout is cleanup.
              *
-             * Do not allow logout cleanup failure
-             * to hide the actual test result.
+             * Do not allow logout failure to hide
+             * the original test result.
              */
 
             System.out.println(
@@ -388,9 +372,9 @@ public class BaseClass {
                         OutputType.FILE
                 );
 
-        // ---------------------------------------------------------
+        // -----------------------------------------------------
         // Store screenshots inside target/screenshots
-        // ---------------------------------------------------------
+        // -----------------------------------------------------
 
         String targetDirectory =
                 System.getProperty("user.dir")
