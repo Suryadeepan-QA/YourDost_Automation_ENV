@@ -25,6 +25,16 @@ public class Experts_Page extends BasePage {
     public Experts_Page(WebDriver driver) {
         super(driver);
 
+        /*
+         * Keep the browser size consistent between local and GitHub Actions.
+         */
+        try {
+            driver.manage().window().setSize(new Dimension(1920, 1080));
+        } catch (Exception e) {
+            System.out.println(
+                    "Unable to set browser window size: " + e.getMessage());
+        }
+
         wait = new WebDriverWait(
                 driver,
                 Duration.ofSeconds(30)
@@ -38,11 +48,23 @@ public class Experts_Page extends BasePage {
     @FindBy(xpath = "//mat-select[@name='category']")
     private WebElement clk_category;
 
-    private final By careerOption =
-            By.xpath(
-                    "//mat-option[.//span[normalize-space()='Career']]"
-            );
+    /*
+     * Angular Material renders mat-option inside the CDK overlay.
+     * Searching from the overlay makes the locator more reliable.
+     */
+    private final By careerOption = By.xpath(
+            "//div[contains(@class,'cdk-overlay-container')]"
+            + "//mat-option[.//span[normalize-space()='Career'] "
+            + "or normalize-space()='Career']"
+    );
 
+    private final By categoryOptions = By.cssSelector(
+            ".cdk-overlay-container mat-option"
+    );
+
+    private final By categoryOverlay = By.cssSelector(
+            ".cdk-overlay-container .cdk-overlay-pane"
+    );
 
     // =========================================================
     // LANGUAGE
@@ -51,11 +73,10 @@ public class Experts_Page extends BasePage {
     @FindBy(xpath = "//mat-select[@name='language']")
     private WebElement clk_language;
 
-    private final By hindiOption =
-            By.xpath(
-                    "//mat-option[.//span[normalize-space()='Hindi']]"
-            );
-
+    private final By hindiOption = By.xpath(
+            "//mat-option[.//span[normalize-space()='Hindi'] "
+            + "or normalize-space()='Hindi']"
+    );
 
     // =========================================================
     // MODE
@@ -64,11 +85,10 @@ public class Experts_Page extends BasePage {
     @FindBy(xpath = "//mat-select[@name='mode']")
     private WebElement clk_mode;
 
-    private final By videoOption =
-            By.xpath(
-                    "//mat-option[.//span[normalize-space()='Video']]"
-            );
-
+    private final By videoOption = By.xpath(
+            "//mat-option[.//span[normalize-space()='Video'] "
+            + "or normalize-space()='Video']"
+    );
 
     // =========================================================
     // GENDER
@@ -77,11 +97,10 @@ public class Experts_Page extends BasePage {
     @FindBy(xpath = "//mat-select[@name='gender']")
     private WebElement clk_gender;
 
-    private final By femaleOption =
-            By.xpath(
-                    "//mat-option[.//span[normalize-space()='Female']]"
-            );
-
+    private final By femaleOption = By.xpath(
+            "//mat-option[.//span[normalize-space()='Female'] "
+            + "or normalize-space()='Female']"
+    );
 
     // =========================================================
     // BOOK APPOINTMENT
@@ -90,25 +109,15 @@ public class Experts_Page extends BasePage {
     @FindBy(xpath = "//span[normalize-space()='BOOK APPOINTMENT']")
     private WebElement clk_bookAppoinment;
 
-
     // =========================================================
     // SELECT CATEGORY
     // =========================================================
 
     public void select_category() {
 
-        System.out.println(
-                "================================================="
-        );
-
-        System.out.println(
-                "STARTING CATEGORY SELECTION"
-        );
-
-        System.out.println(
-                "================================================="
-        );
-
+        System.out.println("=================================================");
+        System.out.println("STARTING CATEGORY SELECTION");
+        System.out.println("=================================================");
 
         // -----------------------------------------------------
         // Print browser window size
@@ -116,8 +125,7 @@ public class Experts_Page extends BasePage {
 
         try {
 
-            Dimension size =
-                    driver.manage().window().getSize();
+            Dimension size = driver.manage().window().getSize();
 
             System.out.println(
                     "Browser window size: " + size
@@ -130,7 +138,6 @@ public class Experts_Page extends BasePage {
                             + e.getMessage()
             );
         }
-
 
         // -----------------------------------------------------
         // Wait for category dropdown
@@ -148,6 +155,25 @@ public class Experts_Page extends BasePage {
                 ExpectedConditions.elementToBeClickable(clk_category)
         );
 
+        // -----------------------------------------------------
+        // Scroll category dropdown into view
+        // -----------------------------------------------------
+
+        try {
+
+            ((org.openqa.selenium.JavascriptExecutor) driver)
+                    .executeScript(
+                            "arguments[0].scrollIntoView({block:'center'});",
+                            clk_category
+                    );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Unable to scroll category dropdown: "
+                            + e.getMessage()
+            );
+        }
 
         // -----------------------------------------------------
         // Click category dropdown
@@ -157,28 +183,64 @@ public class Experts_Page extends BasePage {
                 "Clicking category dropdown..."
         );
 
-        clk_category.click();
+        try {
 
+            clk_category.click();
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Normal click failed. Trying JavaScript click..."
+            );
+
+            ((org.openqa.selenium.JavascriptExecutor) driver)
+                    .executeScript(
+                            "arguments[0].click();",
+                            clk_category
+                    );
+        }
 
         System.out.println(
                 "CATEGORY DROPDOWN CLICKED"
         );
 
+        // -----------------------------------------------------
+        // Wait until Angular Material says dropdown is open
+        // -----------------------------------------------------
+
+        try {
+
+            wait.until(
+                    ExpectedConditions.attributeToBe(
+                            clk_category,
+                            "aria-expanded",
+                            "true"
+                    )
+            );
+
+            System.out.println(
+                    "Category dropdown is OPEN."
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "aria-expanded did not become true. "
+                            + "Continuing with overlay detection."
+            );
+        }
 
         // -----------------------------------------------------
-        // Check aria-expanded
+        // Print aria-expanded
         // -----------------------------------------------------
 
         try {
 
             String expanded =
-                    clk_category.getAttribute(
-                            "aria-expanded"
-                    );
+                    clk_category.getAttribute("aria-expanded");
 
             System.out.println(
-                    "Category aria-expanded = "
-                            + expanded
+                    "Category aria-expanded = " + expanded
             );
 
         } catch (Exception e) {
@@ -189,15 +251,63 @@ public class Experts_Page extends BasePage {
             );
         }
 
-
         // -----------------------------------------------------
-        // Take screenshot after opening dropdown
+        // Screenshot after opening dropdown
         // -----------------------------------------------------
 
         takeScreenshot(
                 "category-dropdown-opened"
         );
 
+        // -----------------------------------------------------
+        // Wait for Angular CDK overlay
+        // -----------------------------------------------------
+
+        System.out.println(
+                "Waiting for Angular CDK overlay..."
+        );
+
+        try {
+
+            wait.until(
+                    ExpectedConditions.presenceOfElementLocated(
+                            By.cssSelector(".cdk-overlay-container")
+                    )
+            );
+
+            System.out.println(
+                    "CDK overlay container FOUND."
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "CDK overlay container was not found."
+            );
+        }
+
+        // -----------------------------------------------------
+        // Wait for CDK overlay pane
+        // -----------------------------------------------------
+
+        try {
+
+            wait.until(
+                    ExpectedConditions.presenceOfElementLocated(
+                            categoryOverlay
+                    )
+            );
+
+            System.out.println(
+                    "CDK overlay pane FOUND."
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "CDK overlay pane was not found."
+            );
+        }
 
         // -----------------------------------------------------
         // Inspect CDK overlay
@@ -206,7 +316,6 @@ public class Experts_Page extends BasePage {
         System.out.println(
                 "Checking Angular CDK overlay..."
         );
-
 
         List<WebElement> overlayContainers =
                 driver.findElements(
@@ -220,7 +329,6 @@ public class Experts_Page extends BasePage {
                         + overlayContainers.size()
         );
 
-
         List<WebElement> overlayPanes =
                 driver.findElements(
                         By.cssSelector(
@@ -233,6 +341,71 @@ public class Experts_Page extends BasePage {
                         + overlayPanes.size()
         );
 
+        // -----------------------------------------------------
+        // Wait for category options
+        // -----------------------------------------------------
+
+        System.out.println(
+                "Waiting for category options..."
+        );
+
+        try {
+
+            wait.until(
+                    ExpectedConditions.presenceOfElementLocated(
+                            categoryOptions
+                    )
+            );
+
+            System.out.println(
+                    "Category options are present."
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Category options were NOT found after "
+                            + "initial dropdown click."
+            );
+
+            /*
+             * Sometimes Angular Material needs another click
+             * when the page is running slowly in CI.
+             */
+            try {
+
+                System.out.println(
+                        "Trying to reopen category dropdown..."
+                );
+
+                String expanded =
+                        clk_category.getAttribute(
+                                "aria-expanded"
+                        );
+
+                if (!"true".equalsIgnoreCase(expanded)) {
+
+                    wait.until(
+                            ExpectedConditions.elementToBeClickable(
+                                    clk_category
+                            )
+                    ).click();
+
+                    wait.until(
+                            ExpectedConditions.presenceOfElementLocated(
+                                    categoryOptions
+                            )
+                    );
+                }
+
+            } catch (Exception retryException) {
+
+                System.out.println(
+                        "Retry also failed: "
+                                + retryException.getMessage()
+                );
+            }
+        }
 
         // -----------------------------------------------------
         // Check mat-option elements
@@ -241,7 +414,7 @@ public class Experts_Page extends BasePage {
         List<WebElement> options =
                 driver.findElements(
                         By.cssSelector(
-                                "mat-option"
+                                ".cdk-overlay-container mat-option"
                         )
                 );
 
@@ -249,7 +422,6 @@ public class Experts_Page extends BasePage {
                 "MAT OPTION COUNT = "
                         + options.size()
         );
-
 
         if (options.isEmpty()) {
 
@@ -284,58 +456,13 @@ public class Experts_Page extends BasePage {
             }
         }
 
-
         // -----------------------------------------------------
-        // Check overlay options specifically
-        // -----------------------------------------------------
-
-        List<WebElement> overlayOptions =
-                driver.findElements(
-                        By.cssSelector(
-                                ".cdk-overlay-container mat-option"
-                        )
-                );
-
-        System.out.println(
-                "VISIBLE OVERLAY OPTIONS = "
-                        + overlayOptions.size()
-        );
-
-
-        if (!overlayOptions.isEmpty()) {
-
-            for (WebElement option : overlayOptions) {
-
-                try {
-
-                    String text =
-                            option.getText().trim();
-
-                    System.out.println(
-                            "OVERLAY OPTION = ["
-                                    + text
-                                    + "]"
-                    );
-
-                } catch (Exception e) {
-
-                    System.out.println(
-                            "Unable to read overlay option: "
-                                    + e.getMessage()
-                    );
-                }
-            }
-        }
-
-
-        // -----------------------------------------------------
-        // Take another screenshot after DOM inspection
+        // Take screenshot after DOM inspection
         // -----------------------------------------------------
 
         takeScreenshot(
                 "category-options-inspection"
         );
-
 
         System.out.println(
                 "================================================="
@@ -348,7 +475,6 @@ public class Experts_Page extends BasePage {
         System.out.println(
                 "================================================="
         );
-
 
         // -----------------------------------------------------
         // Wait for Career
@@ -363,11 +489,9 @@ public class Experts_Page extends BasePage {
                             )
                     );
 
-
             System.out.println(
                     "Career option FOUND."
             );
-
 
             wait.until(
                     ExpectedConditions.elementToBeClickable(
@@ -375,21 +499,17 @@ public class Experts_Page extends BasePage {
                     )
             );
 
-
             career.click();
-
 
             System.out.println(
                     "Career option CLICKED successfully."
             );
-
 
         } catch (Exception e) {
 
             takeScreenshot(
                     "career-option-failure"
             );
-
 
             System.out.println(
                     "================================================="
@@ -403,40 +523,55 @@ public class Experts_Page extends BasePage {
                     "================================================="
             );
 
-            System.out.println(
-                    "Current URL: "
-                            + driver.getCurrentUrl()
-            );
+            try {
+
+                System.out.println(
+                        "Current URL: "
+                                + driver.getCurrentUrl()
+                );
+
+                System.out.println(
+                        "Page title: "
+                                + driver.getTitle()
+                );
+
+                System.out.println(
+                        "aria-expanded: "
+                                + clk_category.getAttribute(
+                                        "aria-expanded"
+                                )
+                );
+
+            } catch (Exception diagnosticException) {
+
+                System.out.println(
+                        "Unable to collect diagnostic information: "
+                                + diagnosticException.getMessage()
+                );
+            }
 
             System.out.println(
-                    "Page title: "
-                            + driver.getTitle()
-            );
-
-            System.out.println(
-                    "aria-expanded: "
-                            + clk_category.getAttribute(
-                                    "aria-expanded"
-                            )
+                    "CDK overlay options at failure = "
+                            + driver.findElements(
+                                    categoryOptions
+                            ).size()
             );
 
             System.out.println(
                     "================================================="
             );
 
-
             throw new RuntimeException(
                     "Career option was not found after "
                             + "opening category dropdown. "
-                            + "MAT OPTION count = "
+                            + "CDK overlay MAT OPTION count = "
                             + driver.findElements(
-                                    By.cssSelector("mat-option")
+                                    categoryOptions
                             ).size(),
                     e
             );
         }
     }
-
 
     // =========================================================
     // SELECT LANGUAGE
@@ -450,14 +585,12 @@ public class Experts_Page extends BasePage {
                 )
         ).click();
 
-
         wait.until(
                 ExpectedConditions.elementToBeClickable(
                         hindiOption
                 )
         ).click();
     }
-
 
     // =========================================================
     // SELECT MODE
@@ -471,14 +604,12 @@ public class Experts_Page extends BasePage {
                 )
         ).click();
 
-
         wait.until(
                 ExpectedConditions.elementToBeClickable(
                         videoOption
                 )
         ).click();
     }
-
 
     // =========================================================
     // SELECT GENDER
@@ -492,14 +623,12 @@ public class Experts_Page extends BasePage {
                 )
         ).click();
 
-
         wait.until(
                 ExpectedConditions.elementToBeClickable(
                         femaleOption
                 )
         ).click();
     }
-
 
     // =========================================================
     // BOOK APPOINTMENT
@@ -514,7 +643,6 @@ public class Experts_Page extends BasePage {
         ).click();
     }
 
-
     // =========================================================
     // SCREENSHOT
     // =========================================================
@@ -526,12 +654,10 @@ public class Experts_Page extends BasePage {
             TakesScreenshot ts =
                     (TakesScreenshot) driver;
 
-
             File source =
                     ts.getScreenshotAs(
                             OutputType.FILE
                     );
-
 
             Path destination =
                     Paths.get(
@@ -540,11 +666,9 @@ public class Experts_Page extends BasePage {
                             name + ".png"
                     );
 
-
             Files.createDirectories(
                     destination.getParent()
             );
-
 
             Files.copy(
                     source.toPath(),
@@ -552,12 +676,10 @@ public class Experts_Page extends BasePage {
                     StandardCopyOption.REPLACE_EXISTING
             );
 
-
             System.out.println(
                     "Screenshot saved: "
                             + destination.toAbsolutePath()
             );
-
 
         } catch (Exception e) {
 
