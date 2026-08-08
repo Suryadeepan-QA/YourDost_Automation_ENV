@@ -26,6 +26,7 @@ public class TC1_VerifyUserLogin extends BaseClass {
 		
 		logger.info("--- User click on the logout button ---");
 		Logout_Page Pl=new Logout_Page(driver);
+		Pl.verifyLoginSuccess();
 		Pl.logout_session();
 		logger.info("--- User Logged Out ---");
 	}

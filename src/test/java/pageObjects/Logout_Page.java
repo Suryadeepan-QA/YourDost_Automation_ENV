@@ -24,6 +24,10 @@ public class Logout_Page extends BasePage{
 	@FindBy(xpath="//li[normalize-space()='Logout']")
 	WebElement btn_logout;
 
+	public void verifyLoginSuccess()
+	{
+		wait.until(ExpectedConditions.visibilityOf(usericon));
+	}
 	public void logout_session()
 	{
 		//usericon.click();
