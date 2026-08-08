@@ -39,3 +39,12 @@ jobs:
             target/surefire-reports/
             test-output/
           if-no-files-found: ignore
+      - name: Upload test reports and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+         name: testng-reports
+         path: |
+           target/surefire-reports/**
+           target/screenshots/**
+
