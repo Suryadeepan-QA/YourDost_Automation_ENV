@@ -8,7 +8,7 @@
   <parameter name="os" value="windows"></parameter>
   <parameter name="browser" value="edge"></parameter>
     <classes>
-      <class name="testCase.TC1_VerifyUserLogin"/>
+      <class name="testCase.TC4_Verify_Appointment_Limit"/>
     </classes>
   </test> <!-- Test -->
 </suite> <!-- Suite -->
