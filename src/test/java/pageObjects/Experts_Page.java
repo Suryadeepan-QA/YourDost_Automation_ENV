@@ -4,8 +4,12 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Experts_Page extends BasePage{
+    WebDriverWait wait;
+
 	public Experts_Page(WebDriver driver) {
 		super(driver);
 	}
@@ -42,9 +46,14 @@ public class Experts_Page extends BasePage{
 	
 	public void select_category()
 	{
-		clk_category.click();
-		select_category.click();
-		driver.switchTo().activeElement().sendKeys(Keys.ESCAPE);
+		//clk_category.click();
+		//select_category.click();
+		//driver.switchTo().activeElement().sendKeys(Keys.ESCAPE);
+		wait.until(ExpectedConditions.elementToBeClickable(clk_category))
+        .click();
+
+        wait.until(ExpectedConditions.elementToBeClickable(select_category))
+        .click();
 	}
 
 	public void select_language()
