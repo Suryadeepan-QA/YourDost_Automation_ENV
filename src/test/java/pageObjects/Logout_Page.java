@@ -16,10 +16,6 @@ public class Logout_Page extends BasePage {
     public Logout_Page(WebDriver driver) {
         super(driver);
 
-        /*
-         * GitHub Actions can be slower than local execution.
-         * Give the page enough time to render the navbar.
-         */
         wait = new WebDriverWait(
                 driver,
                 Duration.ofSeconds(30)
@@ -27,14 +23,28 @@ public class Logout_Page extends BasePage {
     }
 
     // =========================================================
-    // LOCATORS
+    // USER PROFILE BUTTON
     // =========================================================
 
-    @FindBy(xpath = "//div[contains(@class,'DesktopNavBar_usernameContainer')]")
+    /*
+     * Do NOT click the parent div.
+     *
+     * The actual clickable element is the button:
+     *
+     * <button ... aria-haspopup="true">
+     */
+    @FindBy(xpath =
+            "//div[contains(@class,'DesktopNavBar_usernameContainer')]//button")
     private WebElement usericon;
 
-    @FindBy(xpath = "//li[normalize-space()='Logout']")
+    // =========================================================
+    // LOGOUT BUTTON
+    // =========================================================
+
+    @FindBy(xpath =
+            "//li[normalize-space()='Logout']")
     private WebElement btn_logout;
+
 
     // =========================================================
     // VERIFY LOGIN
@@ -43,7 +53,7 @@ public class Logout_Page extends BasePage {
     public void verifyLoginSuccess() {
 
         System.out.println(
-                "Waiting for logged-in user icon..."
+                "Waiting for user profile button..."
         );
 
         wait.until(
@@ -51,9 +61,10 @@ public class Logout_Page extends BasePage {
         );
 
         System.out.println(
-                "User login verified successfully."
+                "User profile button found."
         );
     }
+
 
     // =========================================================
     // LOGOUT
@@ -75,43 +86,35 @@ public class Logout_Page extends BasePage {
 
         try {
 
-            /*
-             * Print the current page information.
-             * This is very useful in GitHub Actions.
-             */
             System.out.println(
-                    "Current URL before logout: "
+                    "Current URL: "
                             + driver.getCurrentUrl()
             );
 
-            System.out.println(
-                    "Current page title: "
-                            + driver.getTitle()
-            );
-
             // -------------------------------------------------
-            // STEP 1: WAIT FOR USER ICON
+            // STEP 1: WAIT FOR USER PROFILE BUTTON
             // -------------------------------------------------
 
             System.out.println(
-                    "Waiting for user icon..."
+                    "Waiting for user profile button..."
             );
 
-            WebElement user =
+            WebElement profileButton =
                     wait.until(
                             ExpectedConditions.elementToBeClickable(
                                     By.xpath(
-                                            "//div[contains(@class,'DesktopNavBar_usernameContainer')]"
+                                            "//div[contains(@class,'DesktopNavBar_usernameContainer')]//button"
                                     )
                             )
                     );
 
             System.out.println(
-                    "User icon found."
+                    "User profile button found."
             );
 
+
             // -------------------------------------------------
-            // STEP 2: SCROLL USER ICON INTO VIEW
+            // STEP 2: SCROLL INTO VIEW
             // -------------------------------------------------
 
             ((org.openqa.selenium.JavascriptExecutor) driver)
@@ -120,23 +123,24 @@ public class Logout_Page extends BasePage {
                                     + "block:'center',"
                                     + "inline:'center'"
                                     + "});",
-                            user
+                            profileButton
                     );
 
             System.out.println(
-                    "User icon scrolled into view."
+                    "User profile button scrolled into view."
             );
 
+
             // -------------------------------------------------
-            // STEP 3: CLICK USER ICON
+            // STEP 3: CLICK PROFILE BUTTON
             // -------------------------------------------------
 
             try {
 
-                user.click();
+                profileButton.click();
 
                 System.out.println(
-                        "User icon clicked successfully."
+                        "User profile button clicked."
                 );
 
             } catch (
@@ -144,7 +148,7 @@ public class Logout_Page extends BasePage {
             ) {
 
                 System.out.println(
-                        "User icon click intercepted."
+                        "Normal profile click intercepted."
                 );
 
                 System.out.println(
@@ -154,16 +158,17 @@ public class Logout_Page extends BasePage {
                 ((org.openqa.selenium.JavascriptExecutor) driver)
                         .executeScript(
                                 "arguments[0].click();",
-                                user
+                                profileButton
                         );
 
                 System.out.println(
-                        "User icon clicked using JavaScript."
+                        "Profile button clicked using JavaScript."
                 );
             }
 
+
             // -------------------------------------------------
-            // STEP 4: WAIT FOR LOGOUT OPTION
+            // STEP 4: WAIT FOR LOGOUT
             // -------------------------------------------------
 
             System.out.println(
@@ -183,6 +188,7 @@ public class Logout_Page extends BasePage {
                     "Logout option found."
             );
 
+
             // -------------------------------------------------
             // STEP 5: CLICK LOGOUT
             // -------------------------------------------------
@@ -200,7 +206,7 @@ public class Logout_Page extends BasePage {
             ) {
 
                 System.out.println(
-                        "Logout click intercepted."
+                        "Normal logout click intercepted."
                 );
 
                 System.out.println(
@@ -218,15 +224,30 @@ public class Logout_Page extends BasePage {
                 );
             }
 
+
+            // -------------------------------------------------
+            // STEP 6: WAIT FOR LOGOUT TO COMPLETE
+            // -------------------------------------------------
+
+            wait.until(
+                    ExpectedConditions.not(
+                            ExpectedConditions.urlContains(
+                                    "/userDashboard/home"
+                            )
+                    )
+            );
+
             System.out.println(
                     "Logout completed successfully."
             );
 
+            System.out.println(
+                    "Current URL after logout: "
+                            + driver.getCurrentUrl()
+            );
+
         } catch (Exception e) {
 
-            /*
-             * Print diagnostics.
-             */
             System.out.println(
                     "================================================="
             );
@@ -247,26 +268,27 @@ public class Logout_Page extends BasePage {
             try {
 
                 System.out.println(
-                        "Current URL after logout failure: "
+                        "Current URL: "
                                 + driver.getCurrentUrl()
                 );
 
                 System.out.println(
-                        "Current title after logout failure: "
+                        "Current title: "
                                 + driver.getTitle()
                 );
 
             } catch (Exception ignored) {
 
                 System.out.println(
-                        "Unable to read current page information."
+                        "Unable to get current page information."
                 );
             }
 
             /*
              * Logout is cleanup.
              *
-             * Do not fail the actual test because of logout.
+             * Do not make the actual test fail because
+             * logout failed.
              */
             System.out.println(
                     "Logout cleanup finished with warning."
@@ -274,4 +296,3 @@ public class Logout_Page extends BasePage {
         }
     }
 }
-
