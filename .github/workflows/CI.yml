@@ -46,6 +46,14 @@ jobs:
         run: mvn -version
 
       # =========================================================
+      # CREATE SCREENSHOT DIRECTORY
+      # =========================================================
+
+      - name: Create Screenshot Directory
+        run: |
+          New-Item -ItemType Directory -Force -Path target/screenshots
+
+      # =========================================================
       # RUN TESTNG
       # =========================================================
 
@@ -61,8 +69,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: testng-reports-${{ github.run_id }}-${{ github.run_attempt }}
+
           path: |
             target/surefire-reports/
-            test-output/
             target/screenshots/
+            test-output/
+
           if-no-files-found: ignore
