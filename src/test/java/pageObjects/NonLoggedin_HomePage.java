@@ -25,8 +25,9 @@ public class NonLoggedin_HomePage extends BasePage{
 	{
 
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-
-	    wait.until(ExpectedConditions.elementToBeClickable(loginbtn)).click();
+		wait.until(ExpectedConditions.visibilityOf(loginbtn));
+		wait.until(ExpectedConditions.elementToBeClickable(loginbtn));
+		loginbtn.click();
 		//loginbtn.click();
 	}
 }
