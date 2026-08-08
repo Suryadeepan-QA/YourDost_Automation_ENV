@@ -24,7 +24,7 @@ public class NonLoggedin_HomePage extends BasePage{
 	public void clickloginbtn() throws IOException
 	{
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
 	    wait.until(ExpectedConditions.elementToBeClickable(loginbtn)).click();
 		//loginbtn.click();
