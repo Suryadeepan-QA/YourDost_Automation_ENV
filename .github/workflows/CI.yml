@@ -1,0 +1,43 @@
+name: YD Automation Tests
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Verify Java
+        run: java -version
+
+      - name: Verify Maven
+        working-directory: yourdost_Automation
+        run: mvn -version
+
+      - name: Run TestNG Suite
+        working-directory: yourdost_Automation
+        run: mvn clean test
+
+      - name: Upload TestNG Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testng-reports
+          path: |
+            yourdost_Automation/target/surefire-reports/
+            yourdost_Automation/test-output/
+          if-no-files-found: ignore
