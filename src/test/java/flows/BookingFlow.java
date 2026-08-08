@@ -56,20 +56,15 @@ public class BookingFlow {
 		logger.info("--- Booking review ---");
 		Booking_Review Br=new Booking_Review(driver);
 		Br.select_category();
-		//Thread.sleep(1000);
 		Br.select_subcategory();
-		//Thread.sleep(1000);
 		Br.select_city();
-		//Thread.sleep(1000);
 		Br.clk_checkbox();
-		//Thread.sleep(1000);
 		Br.clk_Bookappoinment();
 		
 		
 		Booking_Confirmation Bc=new Booking_Confirmation(driver);
 		Assert.assertTrue(Bc.Appoinmentconfirm_isdisplay(), "Appoinment confirmation is not displayed");
 		BaseClass.CaptureScreen("Appoinment Confirmation");
-		//Thread.sleep(1000);
 		Bc.clk_skipbtn();
 		Bc.clk_gohomebtn();
 		Thread.sleep(1000);
@@ -81,9 +76,8 @@ public class BookingFlow {
 		}
 		catch(Exception e)
 		{
-			logger.error("Test failed");
-			logger.debug("Debug logs..");
-			Assert.fail("Test failed because: " + e.getMessage());
+		    logger.error("Booking flow failed", e);
+		    Assert.fail("Booking flow failed: " + e.getMessage(), e);
 		}
 		logger.info("--- Script Ended ---");
 	}
