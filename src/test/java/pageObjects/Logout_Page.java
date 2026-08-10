@@ -41,13 +41,43 @@ public class Logout_Page {
     // LOCATORS
     // =========================================================
 
-    // Mobile 3-line menu
-    private final By menuButton =
+    // -------------------------
+    // MOBILE MENU
+    // -------------------------
+
+    private final By mobileMenuButton =
             By.cssSelector("[data-testid='MenuIcon']");
 
-    // Logout option inside mobile menu
-    private final By logoutButton =
-            By.xpath("//span[normalize-space()='Logout']");
+
+    // -------------------------
+    // DESKTOP PROFILE
+    // -------------------------
+
+    private final By desktopProfileButton =
+            By.xpath(
+                    "//div[contains(@class,'DesktopNavBar_usernameContainer')]//button"
+            );
+
+
+    // -------------------------
+    // MOBILE LOGOUT
+    // -------------------------
+
+    private final By mobileLogoutButton =
+            By.xpath(
+                    "//span[normalize-space()='Logout']"
+            );
+
+
+    // -------------------------
+    // DESKTOP LOGOUT
+    // -------------------------
+
+    private final By desktopLogoutButton =
+            By.xpath(
+                    "//li[normalize-space()='Logout']"
+            );
+
 
     // =========================================================
     // SCREENSHOT DIRECTORY
@@ -67,6 +97,7 @@ public class Logout_Page {
         return directory;
     }
 
+
     // =========================================================
     // SCREENSHOT
     // =========================================================
@@ -84,7 +115,7 @@ public class Logout_Page {
 
             String screenshotPath =
                     getScreenshotDirectory()
-                    + "/"
+                    + File.separator
                     + name
                     + "_"
                     + timestamp
@@ -116,6 +147,7 @@ public class Logout_Page {
         }
     }
 
+
     // =========================================================
     // WAIT FOR PAGE LOAD
     // =========================================================
@@ -144,6 +176,7 @@ public class Logout_Page {
         );
     }
 
+
     // =========================================================
     // VERIFY LOGIN SUCCESS
     // =========================================================
@@ -164,15 +197,7 @@ public class Logout_Page {
 
         try {
 
-            // -------------------------------------------------
-            // 1. Wait for page load
-            // -------------------------------------------------
-
             waitForPageToLoad();
-
-            // -------------------------------------------------
-            // 2. Wait for dashboard URL
-            // -------------------------------------------------
 
             System.out.println(
                     "[LOGIN] Waiting for dashboard..."
@@ -225,14 +250,36 @@ public class Logout_Page {
         }
     }
 
+
+    // =========================================================
+    // CHECK ELEMENT DISPLAYED
+    // =========================================================
+
+    private boolean isElementDisplayed(By locator) {
+
+        try {
+
+            return driver.findElement(locator).isDisplayed();
+
+        } catch (Exception e) {
+
+            return false;
+        }
+    }
+
+
     // =========================================================
     // CLICK MOBILE MENU
     // =========================================================
 
-    private void clickMenu() {
+    private void clickMobileMenu() {
 
         System.out.println(
-                "\n[LOGOUT] Waiting for mobile menu..."
+                "\n[LOGOUT] Mobile layout detected."
+        );
+
+        System.out.println(
+                "[LOGOUT] Waiting for mobile menu..."
         );
 
         try {
@@ -241,7 +288,7 @@ public class Logout_Page {
                     wait.until(
                             ExpectedConditions
                                     .elementToBeClickable(
-                                            menuButton
+                                            mobileMenuButton
                                     )
                     );
 
@@ -252,11 +299,11 @@ public class Logout_Page {
             menu.click();
 
             System.out.println(
-                    "[LOGOUT SUCCESS] Mobile menu clicked successfully."
+                    "[LOGOUT SUCCESS] Mobile menu clicked."
             );
 
             captureScreenshot(
-                    "menu_clicked"
+                    "mobile_menu_clicked"
             );
 
         } catch (Exception e) {
@@ -271,7 +318,7 @@ public class Logout_Page {
             );
 
             captureScreenshot(
-                    "menu_click_failed"
+                    "mobile_menu_click_failed"
             );
 
             throw new RuntimeException(
@@ -282,44 +329,49 @@ public class Logout_Page {
         }
     }
 
+
     // =========================================================
-    // CLICK LOGOUT
+    // CLICK DESKTOP PROFILE
     // =========================================================
 
-    private void clickLogout() {
+    private void clickDesktopProfile() {
 
         System.out.println(
-                "\n[LOGOUT] Waiting for Logout option..."
+                "\n[LOGOUT] Desktop layout detected."
+        );
+
+        System.out.println(
+                "[LOGOUT] Waiting for desktop profile button..."
         );
 
         try {
 
-            WebElement logout =
+            WebElement profile =
                     wait.until(
                             ExpectedConditions
                                     .elementToBeClickable(
-                                            logoutButton
+                                            desktopProfileButton
                                     )
                     );
 
             System.out.println(
-                    "[LOGOUT] Logout option found."
+                    "[LOGOUT] Desktop profile button found."
             );
 
-            logout.click();
+            profile.click();
 
             System.out.println(
-                    "[LOGOUT SUCCESS] Logout button clicked successfully."
+                    "[LOGOUT SUCCESS] Desktop profile clicked."
             );
 
             captureScreenshot(
-                    "logout_clicked"
+                    "desktop_profile_clicked"
             );
 
         } catch (Exception e) {
 
             System.out.println(
-                    "[LOGOUT FAILED] Unable to click Logout."
+                    "[LOGOUT FAILED] Unable to click desktop profile."
             );
 
             System.out.println(
@@ -328,16 +380,133 @@ public class Logout_Page {
             );
 
             captureScreenshot(
-                    "logout_click_failed"
+                    "desktop_profile_click_failed"
             );
 
             throw new RuntimeException(
-                    "Logout button could not be clicked: "
+                    "Desktop profile could not be clicked: "
                     + e.getMessage(),
                     e
             );
         }
     }
+
+
+    // =========================================================
+    // CLICK MOBILE LOGOUT
+    // =========================================================
+
+    private void clickMobileLogout() {
+
+        System.out.println(
+                "\n[LOGOUT] Waiting for Mobile Logout option..."
+        );
+
+        try {
+
+            WebElement logout =
+                    wait.until(
+                            ExpectedConditions
+                                    .elementToBeClickable(
+                                            mobileLogoutButton
+                                    )
+                    );
+
+            System.out.println(
+                    "[LOGOUT] Mobile Logout option found."
+            );
+
+            logout.click();
+
+            System.out.println(
+                    "[LOGOUT SUCCESS] Mobile Logout clicked."
+            );
+
+            captureScreenshot(
+                    "mobile_logout_clicked"
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "[LOGOUT FAILED] Unable to click Mobile Logout."
+            );
+
+            System.out.println(
+                    "[LOGOUT FAILED] Reason: "
+                    + e.getMessage()
+            );
+
+            captureScreenshot(
+                    "mobile_logout_click_failed"
+            );
+
+            throw new RuntimeException(
+                    "Mobile Logout could not be clicked: "
+                    + e.getMessage(),
+                    e
+            );
+        }
+    }
+
+
+    // =========================================================
+    // CLICK DESKTOP LOGOUT
+    // =========================================================
+
+    private void clickDesktopLogout() {
+
+        System.out.println(
+                "\n[LOGOUT] Waiting for Desktop Logout option..."
+        );
+
+        try {
+
+            WebElement logout =
+                    wait.until(
+                            ExpectedConditions
+                                    .elementToBeClickable(
+                                            desktopLogoutButton
+                                    )
+                    );
+
+            System.out.println(
+                    "[LOGOUT] Desktop Logout option found."
+            );
+
+            logout.click();
+
+            System.out.println(
+                    "[LOGOUT SUCCESS] Desktop Logout clicked."
+            );
+
+            captureScreenshot(
+                    "desktop_logout_clicked"
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "[LOGOUT FAILED] Unable to click Desktop Logout."
+            );
+
+            System.out.println(
+                    "[LOGOUT FAILED] Reason: "
+                    + e.getMessage()
+            );
+
+            captureScreenshot(
+                    "desktop_logout_click_failed"
+            );
+
+            throw new RuntimeException(
+                    "Desktop Logout could not be clicked: "
+                    + e.getMessage(),
+                    e
+            );
+        }
+    }
+
 
     // =========================================================
     // VERIFY LOGOUT SUCCESS
@@ -400,8 +569,9 @@ public class Logout_Page {
         }
     }
 
+
     // =========================================================
-    // COMPLETE MOBILE LOGOUT
+    // COMPLETE LOGOUT
     // =========================================================
 
     public void logout_session() {
@@ -438,23 +608,58 @@ public class Logout_Page {
                     "[LOGOUT] Dashboard detected."
             );
 
-            // -------------------------------------------------
-            // 2. Click 3-line mobile menu
-            // -------------------------------------------------
-
-            clickMenu();
 
             // -------------------------------------------------
-            // 3. Click Logout
+            // 2. Detect Desktop / Mobile
             // -------------------------------------------------
 
-            clickLogout();
+            System.out.println(
+                    "[LOGOUT] Detecting dashboard layout..."
+            );
+
+
+            // =================================================
+            // MOBILE
+            // =================================================
+
+            if (isElementDisplayed(mobileMenuButton)) {
+
+                clickMobileMenu();
+
+                clickMobileLogout();
+            }
+
+
+            // =================================================
+            // DESKTOP
+            // =================================================
+
+            else if (isElementDisplayed(desktopProfileButton)) {
+
+                clickDesktopProfile();
+
+                clickDesktopLogout();
+            }
+
+
+            // =================================================
+            // UNKNOWN
+            // =================================================
+
+            else {
+
+                throw new RuntimeException(
+                        "Unable to detect Desktop or Mobile logout UI."
+                );
+            }
+
 
             // -------------------------------------------------
-            // 4. Verify Logout
+            // 3. Verify Logout
             // -------------------------------------------------
 
             verifyLogoutSuccess();
+
 
             System.out.println(
                     "\n=================================================="
