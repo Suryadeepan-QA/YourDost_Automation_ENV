@@ -84,7 +84,7 @@ public class Experts_Page extends BasePage {
     private WebElement clk_language;
 
     private final By hindiOption = By.xpath(
-            "//mat-option[.//span[normalize-space()='Hindi'] "
+            "//mat-option[.//span[normalize-space()='English'] "
             + "or normalize-space()='Hindi']"
     );
 
