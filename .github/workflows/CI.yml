@@ -66,15 +66,16 @@ jobs:
       # UPLOAD REPORTS + SCREENSHOTS
       # =========================================================
 
-      - name: Upload TestNG Reports and Screenshots
+      - name: Upload Test Reports and Screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: testng-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          name: test-reports-${{ github.run_id }}-${{ github.run_attempt }}
 
           path: |
-            target/surefire-reports/
+            reports/
             test-output/
+            target/surefire-reports/
             target/screenshots/
 
           if-no-files-found: ignore
