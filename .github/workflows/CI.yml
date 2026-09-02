@@ -5,12 +5,9 @@ on:
     branches:
       - master
 
-  schedule:
-    # 10:00 AM IST
-    - cron: '30 4 * * *'
-
-    # 5:00 PM IST
-    - cron: '30 11 * * *'
+schedule:
+  - cron: '35 4 * * *'    # 10:05 AM IST
+  - cron: '30 11 * * *'   # 5:00 PM IST
 
   workflow_dispatch:
 
